@@ -2,7 +2,7 @@ using System.Xml;
 
 public class CombatTranslator
 {
-    public Combat Execute(XmlNode player, double aliveMinutes)
+    public static Combat Execute(XmlNode player, double minutesAlive)
     {
         int kills = Convert.ToInt32(player.Attributes!["mKills"]?.Value!);
         int deaths = Convert.ToInt32(player.Attributes!["mDeaths"]?.Value!);
@@ -21,7 +21,7 @@ public class CombatTranslator
             kills,
             deaths,
             totalInvolvements,
-            aliveMinutes
+            minutesAlive
         );
 
         return new Combat
@@ -39,7 +39,7 @@ public class CombatTranslator
         };
     }
 
-    private (int totalInvolvements, double kdRatio, double kdaRatio) CalculateMetrics
+    private static (int totalInvolvements, double kdRatio, double kdaRatio) CalculateMetrics
     (int kills,
     int deaths,
     int assists)
@@ -50,7 +50,7 @@ public class CombatTranslator
         return (totalInvolvements, kdRatio, kdaRatio);
     }
 
-    private (double killsPerMinute, double deathsPerMinute, double involvementsPerMinute) CalculatePerMinute
+    private static (double killsPerMinute, double deathsPerMinute, double involvementsPerMinute) CalculatePerMinute
     (
         int kills,
         int deaths,

@@ -1,8 +1,8 @@
 using System.Xml;
 
-public class PointsBreakdownTranslator
+public class BreakdownTranslator
 {
-    public Breakdown Execute(XmlNode player, int kills, int deaths, int assists, double aliveMinutes)
+    public static Breakdown Execute(XmlNode player, int kills, int deaths, int assists, double minutesAlive)
     {
         int weaponKills = Convert.ToInt32(player.Attributes!["mKillsWeapon"]?.Value!);
         int grenadeKills = Convert.ToInt32(player.Attributes!["mKillsGrenade"]?.Value!);
@@ -21,7 +21,7 @@ public class PointsBreakdownTranslator
             kills,
             deaths,
             assists,
-            aliveMinutes
+            minutesAlive
         );
 
         return new Breakdown
@@ -41,7 +41,7 @@ public class PointsBreakdownTranslator
         };
     }
 
-    private (double weaponKillsRatio, double grenadeKillsRatio, double meleeKillsRatio, double otherKillsRatio) CalculateWeaponRatios(
+    private static (double weaponKillsRatio, double grenadeKillsRatio, double meleeKillsRatio, double otherKillsRatio) CalculateWeaponRatios(
         int kills,
         int weaponKills,
         int grenadeKills,
@@ -61,16 +61,13 @@ public class PointsBreakdownTranslator
         );
     }
 
-    private (
-        double contributionRatio,
-        double killsSuccessRatio
-    ) CalculateCombatRatio(
+    private static (double contributionRatio, double killsSuccessRatio) CalculateCombatRatio
+    (
         int kills,
         int deaths,
         int assists,
         double minutesAlive
-    )
-    {
+    ) {
         const double actionsThreshold = 2.0;
         double rawAMP = minutesAlive > 0.0d ? (kills + assists) / minutesAlive : 0.0d;
         double contributionRatio = rawAMP / actionsThreshold;

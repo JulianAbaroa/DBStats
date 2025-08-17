@@ -3,7 +3,7 @@ using System.Xml;
 
 public class ChoiceTranslator
 {
-    public Choice Execute(XmlNode player, int weaponKills)
+    public static Choice Execute(XmlNode player, int weaponKills)
     {
         int mostUsedWeaponID = Convert.ToInt32(player.Attributes!["mMostUsedWeapon"]?.Value!);
         int mostUsedWeaponKills = Convert.ToInt32(player.Attributes!["mMostUsedWeaponCount"]?.Value!);
@@ -20,7 +20,7 @@ public class ChoiceTranslator
         };
     }
 
-    private string GetMostUsedWeapon(int mostUsedWeaponID)
+    private static string GetMostUsedWeapon(int mostUsedWeaponID)
     {
         var mostUsedWeapon = WeaponType.Unknown;
 

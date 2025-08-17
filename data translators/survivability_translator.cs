@@ -2,7 +2,7 @@ using System.Xml;
 
 public class SurvivabilityTranslator
 {
-    public Survivability Execute(XmlNode player)
+    public static Survivability Execute(XmlNode player)
     {
         double secondsAlive = Convert.ToDouble(player.Attributes!["mSecondsAlive"]?.Value!);
         double secondsPlayed = Convert.ToDouble(player.Attributes!["mSecondsPlayed"]?.Value!);
@@ -14,7 +14,7 @@ public class SurvivabilityTranslator
         return new Survivability
         {
             MinutesAlive = aliveMinutes,
-            MinutesPLayed = playedMinutes,
+            MinutesPlayed = playedMinutes,
             AliveTimeRatio = aliveTimeRatio,
         };
     }

@@ -2,7 +2,7 @@ using System.Xml;
 
 public class PenaltiesTranslator
 {
-    public Penalties Execute(XmlNode player, int kills, int deaths)
+    public static Penalties Execute(XmlNode player, int kills, int deaths)
     {
         int suicides = Convert.ToInt32(player.Attributes!["mSuicides"]?.Value!);
         int betrayals = Convert.ToInt32(player.Attributes!["mBetrayals"]?.Value!);

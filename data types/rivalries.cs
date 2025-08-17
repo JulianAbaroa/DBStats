@@ -1,5 +1,5 @@
 
-public class Rivalries
+public struct Rivalries
 {
     public string MostKilledName { get; set; }
     public int MostKilledCount  { get; set; }

@@ -1,5 +1,5 @@
 
-public class Penalties
+public struct Penalties
 {
     public int Suicides { get; set; }
     public double SuicidesPerDeath { get; set; }

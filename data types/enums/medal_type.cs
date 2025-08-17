@@ -1,39 +1,42 @@
 
 public enum MedalType
 {
-    //AvegeMe = ?
-    //BrosToTheEnd = ?
-    //WheelmanSpree = ?
-    //AssitsSpree = ?
-    //SpawnSpree = ?
-    //RoadHog = ?
-    //Sidekick = ?
-    //Wingman = ?
-    //RoadRage = ?
-    //SecondGunman = ?
-    //Broseidon = ?
-    //Extermination = ?
-    //TripleDouble = ?
-    Unknown = -1,//
+    // AvegeMe: be avenged by a teammate.
+    // Extermination: Kill all the enemy team with at least one overkill medal when you kill the last one.
+    // TripleDouble: End a match with double digits on kills, assists and headshots.
+    // Perfection: Kills 15 enemies and win a match, only on slayer mode.
+     
+    Unknown = -1,
     Assassin = 7,
-    Assist = 8,//
+    Assist = 8,
     Avenger = 9,
+    BallCarrierKill = 10,
+    OddballKill = 16,
     BeatDown = 29,
+    BombCarrierKill = 33,
+    BombPlanted = 38,
     BullTrue = 44,
     CloseCall = 54,
     DoubleKill = 62,
     EMPKill = 64,
     FirstStrike = 74,
-    FlagScore = 77,//
+    FlagScore = 77,
     KilledFlagCarrier = 78,
     FlagKill = 83,
     GrenadeStick = 105,
+    HeilToTheKing = 108,
     Headcase = 110,
     Headshot = 111,
-    Hijack = 114,//
+    HellsJanitor = 112,
+    Hijack = 114,
+    ImmovableObject = 120,
+    LastManStanding = 121,
     Inconceivable = 123,
+    InfectionSpree = 124,
     Invincible = 127,
+    JuggernautSpree = 128,
     KillFromTheGrave = 130,
+    JuggernautKilled = 132,
     KillimanKijaro = 134,
     KillingFrenzy = 135,
     KillingSpree = 136,
@@ -45,6 +48,7 @@ public enum MedalType
     Killtrocity = 142,
     LaserKill = 149,
     Pummel = 156,
+    MmmmBrains = 157,
     OpenSeason = 159,
     Overkill = 162,
     Protector = 171,
@@ -54,7 +58,7 @@ public enum MedalType
     RunningRiot = 189,
     ShotgunSpree = 199,
     Showstopper = 200,
-    Skyjack = 205,//
+    Skyjack = 205,
     SliceNDice = 206,
     Splatter = 212,
     SplatterSpree = 213,
@@ -62,20 +66,34 @@ public enum MedalType
     SwordSpree = 220,
     TripleKill = 224,
     Unfrigginbelievable = 229,
+    UnstoppableForce = 230,
     Untouchable = 231,
     VehicularManslaughter = 236,
-    Wheelman = 239,//
+    Wheelman = 239,
+    ZombieKillingSpree = 241,
     BuckWild = 243,
     SundayDriver = 244,
     CuttingCrew = 245,
+    Thriller = 246,
+    HellsJerome = 247,
     StickSpree = 248,
     StickyFingers = 249,
     Corrected = 250,
     HammerSpree = 251,
     DreamCrusher = 252,
     WreckingCrew = 253,
+    AssitsSpree = 254,
+    Sidekick = 255,
+    SecondGunman = 256,
+    WheelmanSpree = 260,
+    RoadHog = 261,
+    RoadRage = 262,
+    SpawnSpree = 263,
+    Wingman = 264,
+    Broseidon = 265,
     SniperKill = 266,
     Pull = 267,
+    Skullamanjaro = 268,
     Yoink = 269,
     Firebird = 271,
 }

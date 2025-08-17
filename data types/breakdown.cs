@@ -1,5 +1,5 @@
 
-public class Breakdown
+public struct Breakdown
 {
     public int WeaponKills { get; set; }
     public int GrenadeKills { get; set; }

@@ -2,14 +2,14 @@ using System.Xml;
 
 public class MedalsTranslator
 {
-    public Medals Execute(XmlNode player, int kills, double aliveMinutes)
+    public static Medals Execute(XmlNode player, int kills, double minutesAlive)
     {
         int totalMedals = Convert.ToInt32(player.Attributes!["mTotalMedalCount"]?.Value!);
 
         var medalsInfo = GetMedalsInfo(player);
         int medalsObtainedByKills = GetMedalsObtainedByKills(medalsInfo);
         double medalsPerKill = kills > 0.0d ? (double)medalsObtainedByKills / kills : 0.0d;
-        double medalsPerMinute = aliveMinutes > 0.0d ? totalMedals / aliveMinutes : 0.0d;
+        double medalsPerMinute = minutesAlive > 0.0d ? totalMedals / minutesAlive : 0.0d;
 
         return new Medals
         {
@@ -20,7 +20,9 @@ public class MedalsTranslator
         };
     }
 
-    private MedalsInfo GetMedalsInfo(XmlNode player)
+    // TODO: Hacer que MedalsInfo contenga los MedalScores.
+
+    private static MedalsInfo GetMedalsInfo(XmlNode player)
     {
         var medalsInfo = new MedalsInfo();
 
@@ -44,7 +46,7 @@ public class MedalsTranslator
         return medalsInfo;
     }
 
-    private int GetMedalsObtainedByKills(MedalsInfo medalsInfo)
+    private static int GetMedalsObtainedByKills(MedalsInfo medalsInfo)
     {
         int medalsObtainedByKills = 0;
 

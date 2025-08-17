@@ -1,5 +1,5 @@
 
-public class Choice
+public struct Choice
 {
     public string MostUsedWeapon { get; set; }
     public int MostUsedWeaponKills { get; set; }

@@ -1,5 +1,5 @@
 
-public class Combat
+public struct Combat
 {
     public int Kills { get; set; }
     public double KillsPerMinute { get; set; }

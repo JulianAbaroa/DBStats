@@ -2,7 +2,7 @@ using System.Xml;
 
 public class RivalriesTranslator
 {
-    public Rivalries Execute(XmlNode player, int kills, int deaths)
+    public static Rivalries Execute(XmlNode player, int kills, int deaths)
     {
         int mostKilledID = Convert.ToInt32(player.Attributes!["mKilledMostPlayerIndex"]?.Value!);
         int mostKilledCount = Convert.ToInt32(player.Attributes!["mKilledMostPlayerCount"]?.Value!);
@@ -35,7 +35,7 @@ public class RivalriesTranslator
         };
     }
 
-    private (string mostKilledName, string mostKillerName) GetNames(
+    private static (string mostKilledName, string mostKillerName) GetNames(
         XmlNode player,
         int mostKilledID,
         int mostKillerID)
@@ -61,7 +61,7 @@ public class RivalriesTranslator
         );
     }
 
-    private (double mostKilledKillRatio, double mostKillerDeathRatio) CalculateRatios(
+    private static (double mostKilledKillRatio, double mostKillerDeathRatio) CalculateRatios(
         int kills,
         int deaths,
         int mostKilledCount,

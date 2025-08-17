@@ -1,0 +1,17 @@
+for each player do
+    send_incident(kill, current_player, current_player)
+    current_player.score += 1
+
+    if current_player.score >= 20 then
+        game.end_round()
+    end
+end
+
+-- perfection see it more
+-- life saved 
+-- lifesaver
+-- avenged
+-- avenger
+-- extermination
+
+Firefight:
