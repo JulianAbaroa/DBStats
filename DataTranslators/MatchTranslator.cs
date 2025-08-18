@@ -1,0 +1,69 @@
+using DBStats.DataTypes.Dictionaries;
+using DBStats.DataTypes;
+using System.Xml;
+
+namespace DBStats.DataTranslators;
+
+public class MatchTranslator
+{
+    public static Match Excute(XmlNode carnageReport, XmlNode player, string matchID, string carnageReportPath)
+    {
+        var customStats = player.SelectSingleNode("CustomStats")!;
+
+        var gameType = DetectGameType(customStats);
+        string gameTypeName = carnageReport.SelectSingleNode("GameTypeName")?.Value!;
+
+        bool isMatchmaking = Convert.ToBoolean(carnageReport.SelectSingleNode("IsMatchmaking")?.Value);
+
+        bool wasMatchIncomplete = Convert.ToBoolean(carnageReport.SelectSingleNode("mLastMatchIncomplete")?.Value);
+        bool isTeamsEnabled = Convert.ToBoolean(carnageReport.SelectSingleNode("IsTeamsEnabled")?.Value);
+
+        return new Match
+        {
+            GameType = gameType,
+            GameTypeName = gameTypeName,
+            MatchID = matchID,
+            IsMatchmaking = isMatchmaking,
+            WasMatchIncomplete = wasMatchIncomplete,
+            IsTeamsEnabled = isTeamsEnabled,
+            Duration = 0.0,
+            CarnagePath = carnageReportPath,
+            Teams = [],
+        };
+    }
+
+    public static GameType DetectGameType(XmlNode customStats)
+    {
+        var statsNames = new HashSet<string>(
+            customStats.SelectNodes("CustomStat")
+                       ?.Cast<XmlNode>()
+                       .Select(stat => stat.Attributes?["mStatName"]?.Value ?? "")
+                       .Where(name => !string.IsNullOrWhiteSpace(name))
+                       ?? Enumerable.Empty<string>(),
+            StringComparer.OrdinalIgnoreCase
+        );
+
+        foreach (var kv in CustomStats.GameTypeStats)
+        {
+            var gameType = kv.Key;
+            var requiredStats = kv.Value;
+
+            if (requiredStats.All(statsNames.Contains))
+            {
+                return gameType;
+            }
+        }
+
+        int emptyStats = customStats.SelectNodes("CustomStat")
+                                    ?.Cast<XmlNode>()
+                                    .Count(stat => string.IsNullOrWhiteSpace(stat.Attributes?["mStatName"]?.Value)) ?? 0;
+
+        if (emptyStats >= 4)
+        {
+            return GameType.Stockpile;
+        }
+
+        return GameType.Unknown;
+    }
+
+}
