@@ -25,11 +25,11 @@ public class RivalriesTranslator
 
         return new Rivalries
         {
-            MostKilledName = mostKilledName,
+            MostKilledPlayer = mostKilledName,
             MostKilledCount = mostKilledCount,
             MostKilledKillRatio = mostKilledKillRatio,
 
-            MostKillerName = mostKillerName,
+            MostKillerPlayer = mostKillerName,
             MostKillerCount = mostKillerCount,
             MostKillerDeathRatio = mostKillerDeathRatio,
         };

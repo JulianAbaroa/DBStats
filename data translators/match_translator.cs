@@ -61,7 +61,7 @@ public class MatchTranslator
             WasMatchIncomplete = wasMatchIncomplete,
             IsTeamsEnabled = isTeamsEnabled,
             Duration = 0.0,
-            CarnageReportPath = carnageReportPath,
+            CarnagePath = carnageReportPath,
             Teams = [],
             Players = [],
         };
