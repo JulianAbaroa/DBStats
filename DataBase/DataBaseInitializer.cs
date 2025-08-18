@@ -1,5 +1,7 @@
 using Microsoft.Data.Sqlite;
 
+namespace DBStats.DataBase;
+
 public class DataBaseInitializer
 {
     public static void Initialize(SqliteConnection connection)

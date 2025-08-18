@@ -1,7 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using DBStats.DataTypes;
-
-// TODO: FILTRADO DE ARCHIVOS DUPLICADOS.
+using DBStats.DataBase;
+using DBStats.Parser;
 
 namespace DBStats;
 
@@ -18,8 +18,22 @@ class Program
 
         if (!File.Exists(filePath))
         {
-            throw new FileNotFoundException($"Error: El archivo no se encuentra en la ruta: {filePath}");
+            throw new FileNotFoundException($"Error: the file is not found in the path: {filePath}");
         }
+
+        string lastHashPath = @"C:\Users\maste\OneDrive\Documents\Halo\DBStats\last_hash.json";
+
+        string lastHash = File.Exists(lastHashPath) ? File.ReadAllText(lastHashPath) : string.Empty;
+
+        // TODO: test if this actually works, depends directly on how the game generates the xml files.
+
+        if (CarnageDuplicateFilter.IsDuplicate(filePath, lastHash))
+        {
+            throw new InvalidOperationException("Error: duplicated file detected, aborting.");
+        }
+
+        lastHash = CarnageDuplicateFilter.ComputeFileHash(filePath);
+        File.WriteAllText(lastHashPath, lastHash);
 
         Match match = CarnageReportParser.ParseMatch(filePath);
 
@@ -31,8 +45,7 @@ class Program
         connection.Open();
 
         DataBaseInitializer.Initialize(connection);
-
-        // TODO: insertar los datos en las tablas, habilitar 'PRAGMA foreign_keys', hacer metodos para esto.
+        DataBaseInserter.Insert(match);
     }
 
 }

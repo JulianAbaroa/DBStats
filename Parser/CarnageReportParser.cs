@@ -7,7 +7,7 @@ using DBStats.DataTranslators.Player;
 using DBStats.DataTranslators;
 using System.Xml;
 
-namespace DBStats;
+namespace DBStats.Parser;
 
 public class CarnageReportParser
 {
