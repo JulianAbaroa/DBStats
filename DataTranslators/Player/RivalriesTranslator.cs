@@ -1,3 +1,4 @@
+using DBStats.DataTypes.Player;
 using System.Xml;
 
 namespace DBStats.DataTranslators.Player;
@@ -21,7 +22,7 @@ public class RivalriesTranslator
         (double mostKilledKillRatio, double mostKillerDeathRatio) = CalculateRatios(
             kills,
             deaths,
-            kills,
+            mostKilledCount,
             mostKillerCount
         );
 

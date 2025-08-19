@@ -1,4 +1,5 @@
 using DBStats.DataTypes.Dictionaries;
+using DBStats.DataTypes.Enums;
 using DBStats.DataTypes;
 using System.Xml;
 
@@ -11,21 +12,31 @@ public class MatchTranslator
         var customStats = player.SelectSingleNode("CustomStats")!;
 
         var gameType = DetectGameType(customStats);
-        string gameTypeName = carnageReport.SelectSingleNode("GameTypeName")?.Value!;
 
-        bool isMatchmaking = Convert.ToBoolean(carnageReport.SelectSingleNode("IsMatchmaking")?.Value);
+        var gameTypeNode = carnageReport.SelectSingleNode("//GameTypeName");
+        string gameTypeName = gameTypeNode?.Attributes?["GameTypeName"]?.Value
+            ?? throw new NullReferenceException("Error: GameTypeName is null.");
 
-        bool wasMatchIncomplete = Convert.ToBoolean(carnageReport.SelectSingleNode("mLastMatchIncomplete")?.Value);
-        bool isTeamsEnabled = Convert.ToBoolean(carnageReport.SelectSingleNode("IsTeamsEnabled")?.Value);
+        var isMatchmakingNode = carnageReport.SelectSingleNode("//IsMatchmaking");
+        string isMatchmaking = isMatchmakingNode?.Attributes?["IsMatchmaking"]?.Value
+            ?? throw new NullReferenceException("Error: IsMatchmaking is null.");
+
+        var wasMatchIncompleteNode = carnageReport.SelectSingleNode("//mLastMatchIncomplete");
+        string wasMatchIncomplete = wasMatchIncompleteNode?.Attributes?["mLastMatchIncomplete"]?.Value
+            ?? throw new NullReferenceException("Error: WasMatchIncomplete is null.");
+
+        var isTeamsEnabledNode = carnageReport.SelectSingleNode("//IsTeamsEnabled");
+        string isTeamsEnabled = isTeamsEnabledNode?.Attributes?["IsTeamsEnabled"]?.Value
+            ?? throw new NullReferenceException("Error: IsTeamsEnabled is null.");
 
         return new Match
         {
             GameType = gameType,
             GameTypeName = gameTypeName,
             MatchID = matchID,
-            IsMatchmaking = isMatchmaking,
-            WasMatchIncomplete = wasMatchIncomplete,
-            IsTeamsEnabled = isTeamsEnabled,
+            IsMatchmaking = Convert.ToBoolean(isMatchmaking),
+            WasMatchIncomplete = Convert.ToBoolean(wasMatchIncomplete),
+            IsTeamsEnabled = Convert.ToBoolean(isTeamsEnabled),
             Duration = 0.0,
             CarnagePath = carnageReportPath,
             Teams = [],

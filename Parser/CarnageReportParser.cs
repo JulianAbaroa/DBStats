@@ -2,7 +2,6 @@ using DBStats.DataTypes;
 using DBStats.DataTypes.Enums;
 using DBStats.DataTypes.GameTypes;
 using DBStats.DataTranslators.GameTypes;
-using DBStats.DataTranslators.Profile;
 using DBStats.DataTranslators.Player;
 using DBStats.DataTranslators;
 using System.Xml;
@@ -11,21 +10,14 @@ namespace DBStats.Parser;
 
 public class CarnageReportParser
 {
-    public static Match ParseMatch(string filePath)
+    public static Match ParseMatch(XmlDocument carnageReport, XmlNode playerNodes, string filePath)
     {
-        var carnageReport = new XmlDocument();
-        carnageReport.Load(filePath);
-
-        XmlNode playerNodes = carnageReport.SelectSingleNode("/MultiplayerCarnageReport/Players")
-            ?? throw new NullReferenceException("Error: The 'Players' node was not found in the XML.");
-
         XmlNode firstPlayer = playerNodes.FirstChild
             ?? throw new NullReferenceException("Error: First player wasn't found.");
 
         string matchID = Guid.NewGuid().ToString();
 
         var match = MatchTranslator.Excute(carnageReport, firstPlayer, matchID, filePath);
-        var profiles = GetProfiles(playerNodes, match);
         var players = GetPlayers(playerNodes, match);
         var teams = GetTeams(players, match);
 
@@ -41,6 +33,7 @@ public class CarnageReportParser
 
         foreach (XmlNode playerNode in playersNode)
         {
+            string playerID = playerNode.Attributes?["mXboxUserId"]?.Value!;
             var survivability = SurvivabilityTranslator.Execute(playerNode);
             var combat = CombatTranslator.Execute(playerNode, survivability.MinutesAlive);
             var breakdown = BreakdownTranslator.Execute(playerNode, combat.Kills, combat.Deaths, combat.Assists, survivability.MinutesAlive);
@@ -95,6 +88,7 @@ public class CarnageReportParser
 
             var player = new PlayerMatchStats
             {
+                PlayerID = playerID,
                 Combat = combat,
                 Breakdown = breakdown,
                 Rivalries = rivalries,
@@ -150,33 +144,6 @@ public class CarnageReportParser
         return teams.Values.ToList();
     }
 
-    private static List<PlayerProfile> GetProfiles(XmlNode playerNodes, Match match)
-    {
-        var profiles = new List<PlayerProfile>();
 
-        foreach (XmlNode playerNode in playerNodes)
-        {
-            var profile = new PlayerProfile
-            {
-                PlayerID = playerNode.Attributes?["mXboxUserId"]?.Value!,
-                PlayerName = playerNode.Attributes?["mGamertagText"]?.Value!,
-                Customization = CustomizationTranslator.Execute(playerNode),
-                LastSeen = DateTime.UtcNow,
-            };
-
-            if (profile.PlayerID == null)
-            {
-                Console.WriteLine("Error: PlayerID not found.");
-            }
-            else if (profile.PlayerName == null)
-            {
-                Console.WriteLine("Error: PlayerName not found.");
-            }
-
-            profiles.Add(profile);
-        }
-
-        return profiles;
-    }
 
 }

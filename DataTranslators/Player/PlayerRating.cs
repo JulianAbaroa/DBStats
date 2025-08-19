@@ -1,3 +1,5 @@
+using DBStats.DataTypes.Dictionaries;
+using DBStats.DataTypes.Player;
 
 namespace DBStats.DataTranslators.Player;
 

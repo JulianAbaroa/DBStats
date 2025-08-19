@@ -1,5 +1,5 @@
 
-namespace DBStats.DataTypes.Profile;
+namespace DBStats.DataTypes.Profiles;
 
 public struct Customization
 {

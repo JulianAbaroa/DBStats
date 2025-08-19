@@ -1,3 +1,4 @@
+using DBStats.DataTypes.Player;
 using System.Xml;
 
 namespace DBStats.DataTranslators.Player;

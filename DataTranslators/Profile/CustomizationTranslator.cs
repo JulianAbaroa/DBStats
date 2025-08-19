@@ -1,3 +1,4 @@
+using DBStats.DataTypes.Profiles;
 using System.Xml;
 
 namespace DBStats.DataTranslators.Profile;

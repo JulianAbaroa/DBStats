@@ -1,3 +1,5 @@
+using DBStats.DataTypes.Enums;
+using DBStats.DataTypes.Player;
 using System.Text.RegularExpressions;
 using System.Xml;
 

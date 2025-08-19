@@ -4,6 +4,7 @@ namespace DBStats.DataTypes;
 
 public class PlayerMatchStats
 {
+    public required string PlayerID { get; set; }
     public Combat Combat { get; set; }
     public Breakdown Breakdown { get; set; }
     public Rivalries Rivalries { get; set; }

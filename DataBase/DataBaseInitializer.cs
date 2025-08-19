@@ -33,8 +33,8 @@ public class DataBaseInitializer
             last_seen DATETIME            
         )";
 
-        var createCustomizationTable = @"CREATE TABLE IF NOT EXISTS Customization (
-            player_id TEXT NOT NULL,
+        var createCustomizationTable = @"CREATE TABLE IF NOT EXISTS Customizations (
+            player_id TEXT PRIMARY KEY NOT NULL,
             service_id TEXT NOT NULL,
             clan_tag TEXT NOT NULL,
             nameplate INTEGER NOT NULL,
@@ -58,6 +58,7 @@ public class DataBaseInitializer
         var createCombatTable = @"CREATE TABLE IF NOT EXISTS Combat (
             combat_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             kills INTEGER NOT NULL,
             kills_per_minute REAL NOT NULL,
             deaths INTEGER NOT NULL,
@@ -68,12 +69,13 @@ public class DataBaseInitializer
             consecutive_kills INTEGER NOT NULL,
             kill_death_ratio REAL NOT NULL,
             kill_death_assists_ratio REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createBreakdownTable = @"CREATE TABLE IF NOT EXISTS Breakdown (
             breakdown_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             weapon_kills INTEGER NOT NULL,
             grenade_kills INTEGER NOT NULL,
             melee_kills INTEGER NOT NULL,
@@ -84,52 +86,56 @@ public class DataBaseInitializer
             other_kills_ratio REAL NOT NULL,
             contribution_ratio REAL NOT NULL,
             kill_success_ratio REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createRivalriesTable = @"CREATE TABLE IF NOT EXISTS Rivalries (
             rivalries_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             most_killed_player TEXT NOT NULL,
             most_killed_count INTEGER NOT NULL,
             most_killed_kill_ratio REAL NOT NULL,
             most_killer_player TEXT NOT NULL,
             most_killer_count INTEGER NOT NULL,
             most_killer_death_ratio REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createSurvivabilityTable = @"CREATE TABLE IF NOT EXISTS Survivability (
             survivability_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             minutes_alive REAL NOT NULL,
             minutes_played REAL NOT NULL,
             alive_time_ratio REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createChoiceTable = @"CREATE TABLE IF NOT EXISTS Choice (
             choice_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             most_used_weapon TEXT NOT NULL,
             most_used_weapon_kills INTEGER NOT NULL,
             most_used_weapon_kills_ratio REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createMedalsTable = @"CREATE TABLE IF NOT EXISTS Medals (
             medals_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             total_medals INTEGER NOT NULL,
             medals_per_kill REAL NOT NULL,
             medals_per_minute REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createMedalsInfo = @"CREATE TABLE IF NOT EXISTS MedalsInfo (
             medals_info_id INTEGER PRIMARY KEY AUTOINCREMENT,
             medals_id INTEGER NOT NULL,
-            medal_type INTEGER NOT NULL,
+            medal_type TEXT NOT NULL,
             count INTEGER NOT NULL,
             FOREIGN KEY(medals_id) REFERENCES Medals(medals_id)
         )";
@@ -137,94 +143,106 @@ public class DataBaseInitializer
         var createPenaltiesTable = @"CREATE TABLE IF NOT EXISTS Penalties (
             penalties_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             suicides INTEGER NOT NULL,
             suicides_per_death REAL NOT NULL,
             betrayals INTEGER NOT NULL,
             betrayals_per_kill REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createSlayerTable = @"CREATE TABLE IF NOT EXISTS Slayer (
             slayer_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             rating REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createCTFTable = @"CREATE TABLE IF NOT EXISTS CaptureTheFlag (
             ctf_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             flag_captures INTEGER NOT NULL,
             flag_recovers INTEGER NOT NULL,
             flag_carry_time REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createOddballTable = @"CREATE TABLE IF NOT EXISTS Oddball (
             oddball_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             carry_time REAL NOT NULL,
             ball_kills INTEGER NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createKOTHTable = @"CREATE TABLE IF NOT EXISTS KingOfTheHill (
             koth_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             time_in_hill REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createJuggernautTable = @"CREATE TABLE IF NOT EXISTS Juggernaut (
             juggernaut_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             juggernaut_time REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createInfectionTable = @"CREATE TABLE IF NOT EXISTS Infection (
             infection_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             survival_time REAL NOT NULL,
             infections INTEGER NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createTerritoriesTable = @"CREATE TABLE IF NOT EXISTS Territories (
             territories_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             captures INTEGER NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createAssaultTable = @"CREATE TABLE IF NOT EXISTS Assault (
             assault_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             bombs_planted INTEGER NOT NULL,
             detonations INTEGER NOT NULL,
             bomb_carry_time REAL NOT NULL,
             defuses INTEGER NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createStockpileTable = @"CREATE TABLE IF NOT EXISTS Stockpile (
             stockpile_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             carry_time REAL NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createHeadHunterTable = @"CREATE TABLE IF NOT EXISTS HeadHunter (
             head_hunter_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
+            team_id REAL NOT NULL,
             max_skulls INTEGER NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var createActionSackTable = @"CREATE TABLE IF NOT EXISTS ActionSack (
             action_sack_id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id TEXT NOT NULL,
-            FOREIGN KEY(player_id) REFERENCES Players(player_id)
+            team_id REAL NOT NULL,
+            FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
 
         var commands = new string[]
@@ -257,7 +275,8 @@ public class DataBaseInitializer
 
         foreach (var command in commands)
         {
-            using var cmd = new SqliteCommand(command, connection);
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = command;
             cmd.ExecuteNonQuery();
         }
     }

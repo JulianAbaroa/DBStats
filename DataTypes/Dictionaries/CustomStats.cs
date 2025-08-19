@@ -1,3 +1,4 @@
+using DBStats.DataTypes.Enums;
 
 namespace DBStats.DataTypes.Dictionaries;
 

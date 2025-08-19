@@ -1,8 +1,8 @@
-using DBStats.DataTypes.Profile;
+using DBStats.DataTypes.Profiles;
 
 namespace DBStats.DataTypes;
 
-public class PlayerProfile
+public class Profile
 {
     public required string PlayerID { get; set; }
     public required string PlayerName { get; set; }

@@ -1,3 +1,4 @@
+using DBStats.DataTypes.GameTypes;
 using System.Xml;
 
 namespace DBStats.DataTranslators.GameTypes;
