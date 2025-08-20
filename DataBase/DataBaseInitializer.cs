@@ -22,9 +22,93 @@ public class DataBaseInitializer
             match_id TEXT NOT NULL,
             color TEXT NOT NULL,
             rating REAL NOT NULL,
+            winned INTEGER NOT NULL,
             deaths INTEGER NOT NULL,
             kills INTEGER NOT NULL,
             FOREIGN KEY(match_id) REFERENCES Matches(match_id)
+        )";
+
+        var createSlayerTeamsTable = @"CREATE TABLE IF NOT EXISTS SlayerTeams (
+            slayer_team_id INTEGER PRIMARY KEY NOT NULL,
+            team_id INTEGER NOT NULL,
+            rating REAL NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
+        )";
+
+        var createCTFTeamsTable = @"CREATE TABLE IF NOT EXISTS CTFTeams (
+            ctf_team_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id REAL NOT NULL,
+            flag_captures INTEGER NOT NULL,
+            flag_recovers INTEGER NOT NULL,
+            flag_carry_time REAL NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
+        )";
+
+        var createOddballTeamsTable = @"CREATE TABLE IF NOT EXISTS OddballTeams (
+            oddball_team_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id REAL NOT NULL,
+            carry_time REAL NOT NULL,
+            ball_kills INTEGER NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
+        )";
+
+        var createKOTHTeamsTable = @"CREATE TABLE IF NOT EXISTS KingOfTheHillTeams (
+            koth_team_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id REAL NOT NULL,
+            time_in_hill REAL NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
+        )";
+
+        var createJuggernautTeamsTable = @"CREATE TABLE IF NOT EXISTS JuggernautTeams (
+            juggernaut_team_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id REAL NOT NULL,
+            juggernaut_time REAL NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
+        )";
+
+        var createInfectionTeamsTable = @"CREATE TABLE IF NOT EXISTS InfectionTeams (
+            infection_team_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id REAL NOT NULL,
+            survival_time REAL NOT NULL,
+            infections INTEGER NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
+        )";
+
+        var createTerritoriesTeamsTable = @"CREATE TABLE IF NOT EXISTS TerritoriesTeams (
+            territories_team_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id REAL NOT NULL,
+            captures INTEGER NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
+        )";
+
+        var createAssaultTeamsTable = @"CREATE TABLE IF NOT EXISTS AssaultTeams (
+            assault_team_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id REAL NOT NULL,
+            bombs_planted INTEGER NOT NULL,
+            detonations INTEGER NOT NULL,
+            bomb_carry_time REAL NOT NULL,
+            defuses INTEGER NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
+        )";
+
+        var createStockpileTeamsTable = @"CREATE TABLE IF NOT EXISTS StockpileTeams (
+            stockpile_team_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id REAL NOT NULL,
+            carry_time REAL NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
+        )";
+
+        var createHeadHunterTeamsTable = @"CREATE TABLE IF NOT EXISTS HeadHunterTeams (
+            head_hunter_team_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id REAL NOT NULL,
+            max_skulls INTEGER NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
+        )";
+
+        var createActionSackTeamsTable = @"CREATE TABLE IF NOT EXISTS ActionSackTeams (
+            action_sack_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id REAL NOT NULL,
+            FOREIGN KEY(team_id) REFERENCES Teams(team_id)
         )";
 
         var createProfilesTable = @"CREATE TABLE IF NOT EXISTS Profiles (
@@ -84,7 +168,6 @@ public class DataBaseInitializer
             grenade_kills_ratio REAL NOT NULL,
             melee_kills_ratio REAL NOT NULL,
             other_kills_ratio REAL NOT NULL,
-            contribution_ratio REAL NOT NULL,
             kill_success_ratio REAL NOT NULL,
             FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)
         )";
@@ -249,6 +332,17 @@ public class DataBaseInitializer
         {
             createMatchesTable,
             createTeamsTable,
+            createSlayerTeamsTable,
+            createCTFTeamsTable,
+            createOddballTeamsTable,
+            createKOTHTeamsTable,
+            createJuggernautTeamsTable,
+            createInfectionTeamsTable,
+            createTerritoriesTeamsTable,
+            createAssaultTeamsTable,
+            createStockpileTeamsTable,
+            createHeadHunterTeamsTable,
+            createActionSackTeamsTable,
             createProfilesTable,
             createCustomizationTable,
             createPlayersTable,

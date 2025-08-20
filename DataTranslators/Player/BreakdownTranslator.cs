@@ -20,11 +20,9 @@ public class BreakdownTranslator
             otherKills
         );
 
-        (double contributionRatio, double pointsSuccessRatio) = CalculateCombatRatio(
+        double killsSuccessRatio = CalculateCombatRatio(
             kills,
-            deaths,
-            assists,
-            minutesAlive
+            deaths
         );
 
         return new Breakdown
@@ -39,8 +37,7 @@ public class BreakdownTranslator
             MeleeKillsRatio = meleeKillsRatio,
             OtherKillsRatio = otherKillsRatio,
 
-            ContributionRatio = contributionRatio,
-            KillSuccessRatio = pointsSuccessRatio,
+            KillSuccessRatio = killsSuccessRatio,
         };
     }
 
@@ -64,21 +61,15 @@ public class BreakdownTranslator
         );
     }
 
-    private static (double contributionRatio, double killsSuccessRatio) CalculateCombatRatio
+    private static double CalculateCombatRatio
     (
         int kills,
-        int deaths,
-        int assists,
-        double minutesAlive
+        int deaths
     )
     {
-        const double actionsThreshold = 2.0;
-        double rawAMP = minutesAlive > 0.0d ? (kills + assists) / minutesAlive : 0.0d;
-        double contributionRatio = rawAMP / actionsThreshold;
         double killsSuccessRatio = (kills + deaths) > 0.0d ? (double)kills / (kills + deaths) : 0.0d;
 
         return (
-            contributionRatio,
             killsSuccessRatio
         );
     }

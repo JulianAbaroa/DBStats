@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using DBStats.Duplicates;
 using DBStats.DataTypes;
 using DBStats.DataBase;
 using DBStats.Parser;
@@ -22,22 +23,27 @@ class Program
         //    throw new FileNotFoundException($"Error: the file is not found in the path: {filePath}");
         //}
 
-        string filePath = @"C:\Users\maste\OneDrive\Documents\Halo\Carnages\mpcarnagereport1_3495_0_0.xml";
+        // Temporal path.
+        string filePath = @"C:\Users\maste\OneDrive\Documents\Halo\Carnages\CarnageReport_PlaceHolderAlt_20250820_163525.xml";
+
+        string? matchHash = MatchHasher.ComputeMatchHash(filePath);
+
+        if (string.IsNullOrEmpty(matchHash))
+        {
+            throw new InvalidOperationException("Error: matchHash is not valid.");
+        }
 
         // This is not the final path.
-        //string lastHashPath = @"C:\Users\maste\OneDrive\Documents\Halo\DBStats\last_hash.json";
+        string lastHashPath = @"C:\Users\maste\OneDrive\Documents\Halo\DBStats\Duplicates\last_hash.json";
 
-        //string lastHash = File.Exists(lastHashPath) ? File.ReadAllText(lastHashPath) : string.Empty;
+        string lastHash = File.Exists(lastHashPath) ? File.ReadAllText(lastHashPath) : string.Empty;
 
-        // TODO: test if this actually works, depends directly on how the game generates the xml files.
+        if (matchHash == lastHash)
+        {
+            throw new InvalidOperationException("Error: duplicated file detected, aborting.");
+        }
 
-        //if (CarnageDuplicateFilter.IsDuplicate(filePath, lastHash))
-        //{
-        //    throw new InvalidOperationException("Error: duplicated file detected, aborting.");
-        //}
-
-        //lastHash = CarnageDuplicateFilter.ComputeFileHash(filePath);
-        //File.WriteAllText(lastHashPath, lastHash);
+        File.WriteAllText(lastHashPath, matchHash);
 
         var carnageReport = new XmlDocument();
         carnageReport.Load(filePath);
@@ -64,8 +70,6 @@ class Program
 
         DataBaseInitializer.Initialize(connection);
         DataBaseInserter.Insert(connection, match, profiles);
-
-
     }
 
 }

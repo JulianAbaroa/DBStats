@@ -5,6 +5,7 @@ using DBStats.DataTranslators.GameTypes;
 using DBStats.DataTranslators.Player;
 using DBStats.DataTranslators;
 using System.Xml;
+using DBStats.Interfaces;
 
 namespace DBStats.Parser;
 
@@ -20,6 +21,8 @@ public class CarnageReportParser
         var match = MatchTranslator.Excute(carnageReport, firstPlayer, matchID, filePath);
         var players = GetPlayers(playerNodes, match);
         var teams = GetTeams(players, match);
+        AdjustPlayersRating(teams);
+        SetTeamWinner(teams);
 
         match.Duration = players.Max(p => p.Survivability.MinutesPlayed);
         match.Teams = teams;
@@ -115,6 +118,7 @@ public class CarnageReportParser
         {
             if (!match.IsTeamsEnabled)
             {
+                // TODO: VER COMO REACCIONA ESTO.
                 player.Team = "FFA";
             }
 
@@ -129,11 +133,22 @@ public class CarnageReportParser
                 };
 
                 teams[player.Team] = team;
+
+                if (player.GameMode != null && team.GameMode == null)
+                {
+                    Type gamemodeType = player.GameMode.GetType();
+                    team.GameMode = (IGameMode?)Activator.CreateInstance(gamemodeType);
+                }
             }
 
             team.Players.Add(player);
             team.Kills += player.Combat.Kills;
             team.Deaths += player.Combat.Deaths;
+
+            if (player.GameMode is IGameMode playerGameMode && team.GameMode is IGameMode teamGameMode)
+            {
+                teamGameMode.AddStats(playerGameMode);
+            }
         }
 
         foreach (var team in teams.Values)
@@ -144,6 +159,51 @@ public class CarnageReportParser
         return teams.Values.ToList();
     }
 
+    private static void SetTeamWinner(List<Team> teams)
+    {
+        if (teams == null || teams.Count == 0)
+        {
+            throw new InvalidOperationException("Error: teams in null or empty");
+        }
 
+        // TODO: PROBABLEMENTE HAYA QUE DIFERENCIAR SEGUN QUE IGAMEMODES.
+        var winningTeam = teams.OrderByDescending(t => t.GameMode?.GetScore()).FirstOrDefault()
+            ?? throw new NullReferenceException("Error: winning team is null.");
+
+        foreach (var team in teams)
+        {
+            if (team == winningTeam)
+            {
+                team.Winned = true;
+            }
+            else
+            {
+                team.Winned = false;
+            }
+        }
+    }
+
+    private static void AdjustPlayersRating(List<Team> teams)
+    {
+        if (teams == null || teams.Count == 0)
+        {
+            throw new InvalidOperationException("Error: teams in null or empty");
+        }
+
+        foreach (var currentTeam in teams)
+        {
+            double opponentAverageRating = teams
+                .Where(t => t.Color != currentTeam.Color)
+                .Average(t => t.Rating);
+
+            double difficultyFactor = opponentAverageRating - currentTeam.Rating;
+
+            foreach (var player in currentTeam.Players)
+            {
+                double ratingAdjustment = difficultyFactor * 0.25;
+                player.Rating += ratingAdjustment;
+            }
+        }
+    }
 
 }

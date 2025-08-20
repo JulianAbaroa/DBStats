@@ -22,6 +22,51 @@ public class DataBaseInserter
         {
             long teamID = AddTeam(connection, team, match.MatchID);
 
+            if (team.GameMode is Slayer teamSlayer)
+            {
+                AddTeamSlayer(connection, teamSlayer, teamID);
+            }
+            else if (team.GameMode is CaptureTheFlag teamCaptureTheFlag)
+            {
+                AddTeamCaptureTheFlag(connection, teamCaptureTheFlag, teamID);
+            }
+            else if (team.GameMode is Oddball teamOddball)
+            {
+                AddTeamOddball(connection, teamOddball, teamID);
+            }
+            else if (team.GameMode is KingOfTheHill teamKingOfTheHill)
+            {
+                AddTeamKingOfTheHill(connection, teamKingOfTheHill, teamID);
+            }
+            else if (team.GameMode is Juggernaut teamJuggernaut)
+            {
+                AddTeamJuggernaut(connection, teamJuggernaut, teamID);
+            }
+            else if (team.GameMode is Infection teamInfection)
+            {
+                AddTeamInfection(connection, teamInfection, teamID);
+            }
+            else if (team.GameMode is Territories teamTerritories)
+            {
+                AddTeamTerritories(connection, teamTerritories, teamID);
+            }
+            else if (team.GameMode is Assault teamAssault)
+            {
+                AddTeamAssault(connection, teamAssault, teamID);
+            }
+            else if (team.GameMode is Stockpile teamStockpile)
+            {
+                AddTeamStockpile(connection, teamStockpile, teamID);
+            }
+            else if (team.GameMode is HeadHunter teamHeadHunter)
+            {
+                AddTeamHeadHunter(connection, teamHeadHunter, teamID);
+            }
+            else if (team.GameMode is ActionSack)
+            {
+                AddTeamActionSack(connection, teamID);
+            }
+
             foreach (var player in team.Players)
             {
                 AddPlayer(connection, player, teamID);
@@ -128,12 +173,14 @@ public class DataBaseInserter
             match_id,
             color,
             rating,
+            winned,
             deaths,
             kills
         ) VALUES (
             $match_id,
             $color,
             $rating,
+            $winned,
             $deaths,
             $kills
         );";
@@ -141,6 +188,7 @@ public class DataBaseInserter
         cmd.Parameters.AddWithValue("$match_id", matchID);
         cmd.Parameters.AddWithValue("$color", team.Color);
         cmd.Parameters.AddWithValue("$rating", team.Rating);
+        cmd.Parameters.AddWithValue("$winned", team.Winned);
         cmd.Parameters.AddWithValue("$deaths", team.Deaths);
         cmd.Parameters.AddWithValue("$kills", team.Kills);
 
@@ -161,6 +209,255 @@ public class DataBaseInserter
 
         long teamID = Convert.ToInt64(result);
         return teamID;
+    }
+
+    private static void AddTeamSlayer(SqliteConnection connection, Slayer slayer, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO SlayerTeams (
+            team_id,
+            rating
+        ) VALUES (
+            $team_id,
+            $rating
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$rating", slayer.Rating);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
+    }
+
+    private static void AddTeamCaptureTheFlag(SqliteConnection connection, CaptureTheFlag captureTheFlag, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO CTFTeams (
+            team_id,
+            flag_captures,
+            flag_recovers,
+            flag_carry_time
+        ) VALUES (
+            $team_id,
+            $flag_captures,
+            $flag_recovers,
+            $flag_carry_time
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$flag_captures", captureTheFlag.FlagCaptures);
+        cmd.Parameters.AddWithValue("$flag_recovers", captureTheFlag.FlagRecovers);
+        cmd.Parameters.AddWithValue("$flag_carry_time", captureTheFlag.FlagCarryTime);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
+    }
+
+    private static void AddTeamOddball(SqliteConnection connection, Oddball oddball, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO OddballTeams (
+            team_id,
+            carry_time,
+            ball_kills
+        ) VALUES (
+            $team_id,
+            $carry_time,
+            $ball_kills
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$carry_time", oddball.CarryTime);
+        cmd.Parameters.AddWithValue("$ball_kills", oddball.BallKills);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
+    }
+
+    private static void AddTeamKingOfTheHill(SqliteConnection connection, KingOfTheHill kingOfTheHill, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO KingOfTheHillTeams (
+            team_id,
+            time_in_hill
+        ) VALUES (
+            $team_id,
+            $time_in_hill
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$time_in_hill", kingOfTheHill.TimeinHill);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
+    }
+
+    private static void AddTeamJuggernaut(SqliteConnection connection, Juggernaut juggernaut, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO JuggernautTeams (
+            team_id,
+            juggernaut_time
+        ) VALUES (
+            $team_id,
+            $juggernaut_time
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$juggernaut_time", juggernaut.JuggernautTime);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
+    }
+
+    private static void AddTeamInfection(SqliteConnection connection, Infection infection, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO InfectionTeams (
+            team_id,
+            survival_time,
+            infections
+        ) VALUES (
+            $team_id,
+            $survival_time,
+            $infections
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$survival_time", infection.SurvivalTime);
+        cmd.Parameters.AddWithValue("$infections", infection.Infections);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
+    }
+
+    private static void AddTeamTerritories(SqliteConnection connection, Territories territories, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO TerritoriesTeams (
+            team_id,
+            captures
+        ) VALUES (
+            $team_id,
+            $captures
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$captures", territories.Captures);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
+    }
+
+    private static void AddTeamAssault(SqliteConnection connection, Assault assault, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO AssaultTeams (
+            team_id,
+            bombs_planted,
+            detonations,
+            bomb_carry_time
+            defuses
+        ) VALUES (
+            $team_id,
+            $bombs_planted,
+            $detonations,
+            $bomb_carry_time,
+            $defuses
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$bombs_planted", assault.BombsPlanted);
+        cmd.Parameters.AddWithValue("$detonations", assault.Detonations);
+        cmd.Parameters.AddWithValue("$bomb_carry_time", assault.BombCarryTime);
+        cmd.Parameters.AddWithValue("$defuses", assault.Defuses);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
+    }
+
+    private static void AddTeamStockpile(SqliteConnection connection, Stockpile stockpile, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO StockpileTeams (
+            team_id,
+            carry_time
+        ) VALUES (
+            $team_id,
+            $carry_time
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$carry_time", stockpile.CarryTime);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
+    }
+
+    private static void AddTeamHeadHunter(SqliteConnection connection, HeadHunter headHunter, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO HeadHunterTeams (
+            team_id,
+            max_skulls
+        ) VALUES (
+            $team_id,
+            $max_skulls
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$max_skulls", headHunter.MaxSkulls);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
+    }
+
+    private static void AddTeamActionSack(SqliteConnection connection, long teamID)
+    {
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = @"INSERT INTO ActionSackTeams (
+            team_id
+        ) VALUES (
+            $team_id
+        );";
+
+        cmd.Parameters.AddWithValue("$team_id", teamID);
+
+        int rows = cmd.ExecuteNonQuery();
+        if (rows == 0)
+        {
+            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+        }
     }
 
     private static void AddProfile(SqliteConnection connection, Profile profile)
@@ -318,7 +615,6 @@ public class DataBaseInserter
             grenade_kills_ratio,
             melee_kills_ratio,
             other_kills_ratio,
-            contribution_ratio,
             kill_success_ratio
         ) VALUES (
             $player_id,
@@ -331,7 +627,6 @@ public class DataBaseInserter
             $grenade_kills_ratio,
             $melee_kills_ratio,
             $other_kills_ratio,
-            $contribution_ratio,
             $kill_success_ratio
         );";
 
@@ -345,7 +640,6 @@ public class DataBaseInserter
         cmd.Parameters.AddWithValue("$grenade_kills_ratio", breakdown.GrenadeKillsRatio);
         cmd.Parameters.AddWithValue("$melee_kills_ratio", breakdown.MeleeKillsRatio);
         cmd.Parameters.AddWithValue("$other_kills_ratio", breakdown.OtherKillsRatio);
-        cmd.Parameters.AddWithValue("$contribution_ratio", breakdown.ContributionRatio);
         cmd.Parameters.AddWithValue("$kill_success_ratio", breakdown.KillSuccessRatio);
 
         int rows = cmd.ExecuteNonQuery();

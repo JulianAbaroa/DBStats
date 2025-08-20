@@ -13,6 +13,5 @@ public struct Breakdown
     public double MeleeKillsRatio { get; set; }
     public double OtherKillsRatio { get; set; }
 
-    public double ContributionRatio { get; set; }
     public double KillSuccessRatio { get; set; }
 }
