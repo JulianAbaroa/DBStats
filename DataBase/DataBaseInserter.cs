@@ -138,7 +138,8 @@ public class DataBaseInserter
             was_match_incomplete,
             is_teams_enabled,
             duration,
-            carnage_path
+            carnage_path,
+            match_timestamp
         ) VALUES (
             $match_id,
             $gametype,
@@ -147,7 +148,8 @@ public class DataBaseInserter
             $was_match_incomplete,
             $is_teams_enabled,
             $duration,
-            $carnage_path
+            $carnage_path,
+            $match_timestamp
         );";
 
         cmd.Parameters.AddWithValue("$match_id", match.MatchID);
@@ -158,6 +160,7 @@ public class DataBaseInserter
         cmd.Parameters.AddWithValue("$is_teams_enabled", match.IsTeamsEnabled ? 1 : 0);
         cmd.Parameters.AddWithValue("$duration", match.Duration);
         cmd.Parameters.AddWithValue("$carnage_path", match.CarnagePath);
+        cmd.Parameters.AddWithValue("$match_timestamp", match.MatchTimestamp);
 
         int rows = cmd.ExecuteNonQuery();
         if (rows == 0)
@@ -377,7 +380,7 @@ public class DataBaseInserter
             team_id,
             bombs_planted,
             detonations,
-            bomb_carry_time
+            bomb_carry_time,
             defuses
         ) VALUES (
             $team_id,
@@ -491,33 +494,21 @@ public class DataBaseInserter
             player_id,
             service_id,
             clan_tag,
-            nameplate,
-            emblem_texture_zero,
-            emblem_texture_one,
-            emblem_color_zero,
-            emblem_color_one,
-            emblem_color_two
+            nameplate_path,
+            emblem_path
         ) VALUES (
             $player_id,
             $service_id,
             $clan_tag,
-            $nameplate,
-            $emblem_texture_zero,
-            $emblem_texture_one,
-            $emblem_color_zero,
-            $emblem_color_one,
-            $emblem_color_two
+            $nameplate_path,
+            $emblem_path
         );";
 
         cmd.Parameters.AddWithValue("$player_id", playerID);
         cmd.Parameters.AddWithValue("$service_id", customization.ServiceID);
         cmd.Parameters.AddWithValue("$clan_tag", customization.ClanTag);
-        cmd.Parameters.AddWithValue("$nameplate", customization.Nameplate);
-        cmd.Parameters.AddWithValue("$emblem_texture_zero", customization.EmblemTextureZero);
-        cmd.Parameters.AddWithValue("$emblem_texture_one", customization.EmblemTextureOne);
-        cmd.Parameters.AddWithValue("$emblem_color_zero", customization.EmblemColorZero);
-        cmd.Parameters.AddWithValue("$emblem_color_one", customization.EmblemColorOne);
-        cmd.Parameters.AddWithValue("$emblem_color_two", customization.EmblemColorTwo);
+        cmd.Parameters.AddWithValue("$nameplate_path", customization.NameplatePath);
+        cmd.Parameters.AddWithValue("$emblem_path", customization.EmblemPath);
 
         int rows = cmd.ExecuteNonQuery();
         if (rows == 0)
@@ -1049,7 +1040,7 @@ public class DataBaseInserter
             team_id,
             bombs_planted,
             detonations,
-            bomb_carry_time
+            bomb_carry_time,
             defuses
         ) VALUES (
             $player_id,

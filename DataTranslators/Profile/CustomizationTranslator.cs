@@ -5,7 +5,7 @@ namespace DBStats.DataTranslators.Profile;
 
 public class CustomizationTranslator
 {
-    public static Customization Execute(XmlNode player)
+    public static Customization Execute(XmlNode player, string assetsPath, string playerName)
     {
         string serviceID = player.Attributes!["ServiceId"]?.Value!;
         string clanTag = player.Attributes!["ClantagText"]?.Value!;
@@ -19,16 +19,17 @@ public class CustomizationTranslator
         int emblemColorOne = Convert.ToInt32(player.Attributes!["EmblemColor1"]?.Value!);
         int emblemColorTwo = Convert.ToInt32(player.Attributes!["EmblemColor2"]?.Value!);
 
+        string nameplateImageName = AssetsMapper.GetNameplateImageName(nameplate);
+        string nameplatePath = Path.Combine(assetsPath, "Nameplates", $"{nameplateImageName}.png");
+
+        string emblemPath = ImageCreator.CreateEmblemImage(emblemTextureZero, emblemTextureOne, emblemColorZero, emblemColorOne, emblemColorTwo, assetsPath, playerName);
+
         return new Customization
         {
             ServiceID = serviceID,
             ClanTag = clanTag,
-            Nameplate = nameplate,
-            EmblemTextureZero = emblemTextureZero,
-            EmblemTextureOne = emblemTextureOne,
-            EmblemColorZero = emblemColorZero,
-            EmblemColorOne = emblemColorOne,
-            EmblemColorTwo = emblemColorTwo
+            NameplatePath = nameplatePath,
+            EmblemPath = emblemPath
         };
     }
 }

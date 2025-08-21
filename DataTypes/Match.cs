@@ -12,6 +12,7 @@ public class Match
     public bool IsTeamsEnabled { get; set; }
     public double Duration { get; set; }
     public required string CarnagePath { get; set; }
+    public DateTime MatchTimestamp { get; set; }
 
     public required List<Team> Teams { get; set; }
 }

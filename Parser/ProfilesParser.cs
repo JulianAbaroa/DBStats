@@ -16,18 +16,19 @@ public class ProfilesParser
             {
                 PlayerID = playerNode.Attributes?["mXboxUserId"]?.Value!,
                 PlayerName = playerNode.Attributes?["mGamertagText"]?.Value!,
-                Customization = CustomizationTranslator.Execute(playerNode),
                 LastSeen = DateTime.UtcNow,
             };
 
             if (profile.PlayerID == null)
             {
-                Console.WriteLine("Error: PlayerID not found.");
+                throw new NullReferenceException("Error: PlayerID not found.");
             }
             else if (profile.PlayerName == null)
             {
-                Console.WriteLine("Error: PlayerName not found.");
+                throw new NullReferenceException("Error: PlayerName not found.");
             }
+
+            profile.Customization = CustomizationTranslator.Execute(playerNode, @"C:\Users\maste\OneDrive\Documents\Halo\Discord Bot", profile.PlayerName);
 
             profiles.Add(profile);
         }

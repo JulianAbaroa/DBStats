@@ -29,6 +29,8 @@ public class MatchTranslator
         string isTeamsEnabled = isTeamsEnabledNode?.Attributes?["IsTeamsEnabled"]?.Value
             ?? throw new NullReferenceException("Error: IsTeamsEnabled is null.");
 
+        var matchTimeStamp = DateTime.UtcNow;
+
         return new Match
         {
             GameType = gameType,
@@ -39,6 +41,7 @@ public class MatchTranslator
             IsTeamsEnabled = Convert.ToBoolean(isTeamsEnabled),
             Duration = 0.0,
             CarnagePath = carnageReportPath,
+            MatchTimestamp = matchTimeStamp,
             Teams = [],
         };
     }
