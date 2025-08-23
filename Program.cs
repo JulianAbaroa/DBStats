@@ -10,52 +10,75 @@ namespace DBStats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        if (args.Length == 0)
+        try
         {
-            //return;
+            Console.WriteLine("=== DBStats START ===");
+
+            // TODO: TEMPORAL PATH.
+            const string CARNAGES_PATH = @"C:\Users\maste\OneDrive\Documents\Halo\Carnages";
+
+            string[] carnagePaths = Directory.GetFiles(CARNAGES_PATH, "*.xml");
+
+            Console.WriteLine($"Found {carnagePaths.Length} XML files to process.");
+
+            if (carnagePaths.Length == 0)
+            {
+                Console.WriteLine("No XML files found. Exiting.");
+                return;
+            }
+
+            foreach (string carnagePath in carnagePaths)
+            {
+                if (!File.Exists(carnagePath))
+                {
+                    Console.WriteLine("File.Exists returned false for: " + carnagePath);
+                    throw new FileNotFoundException($"Error: the file is not found in the path: {carnagePath}");
+                }
+
+                // Initialization.
+                AssetsMapper.LoadMaps();
+                CheckForDuplicates(carnagePath);
+
+                var carnageReport = new XmlDocument();
+                carnageReport.Load(carnagePath);
+
+                XmlNode playerNodes = carnageReport.SelectSingleNode("/MultiplayerCarnageReport/Players")
+                    ?? throw new NullReferenceException("Error: The 'Players' node was not found in the XML.");
+
+                Match match = CarnageReportParser.ParseMatch(carnageReport, playerNodes, carnagePath);
+                List<Profile> profiles = ProfilesParser.ParseProfiles(playerNodes);
+
+                // TODO: TEMPORAL PATH.
+                string dataBasePath = @"C:\Users\maste\OneDrive\Documents\Halo\DBStats DataBase";
+
+                if (!File.Exists(dataBasePath))
+                {
+                    Directory.CreateDirectory(dataBasePath);
+                }
+
+                string connectionString = $"Data Source={Path.Combine(dataBasePath, "dbstats.db")}";
+
+                using var connection = new SqliteConnection(connectionString);
+                connection.Open();
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = "PRAGMA foreign_keys = ON;";
+                    cmd.ExecuteNonQuery();
+                }
+
+                DataBaseInitializer.Initialize(connection);
+                DataBaseInserter.Insert(connection, match, profiles);
+                SaveProcessedCarnage(carnagePath);
+            }
         }
-
-        //string filePath = args[0];
-
-        //if (!File.Exists(filePath))
-        //{
-        //    throw new FileNotFoundException($"Error: the file is not found in the path: {filePath}");
-        //}
-
-        // TODO: TEMPORAL PATH.
-        string carnagePath = @"C:\Users\maste\OneDrive\Documents\Halo\Carnages\CarnageReport_PlaceHolder021_20250820_230210.xml";
-
-        // Initialization.
-        AssetsMapper.LoadMaps();
-        CheckForDuplicates(carnagePath);
-
-        var carnageReport = new XmlDocument();
-        carnageReport.Load(carnagePath);
-
-        XmlNode playerNodes = carnageReport.SelectSingleNode("/MultiplayerCarnageReport/Players")
-            ?? throw new NullReferenceException("Error: The 'Players' node was not found in the XML.");
-
-        Match match = CarnageReportParser.ParseMatch(carnageReport, playerNodes, carnagePath);
-        List<Profile> profiles = ProfilesParser.ParseProfiles(playerNodes);
-
-        // TODO: TEMPORAL PATH.
-        string folderPath = @"C:\Users\maste\OneDrive\Documents\Halo\DBStats DataBase";
-
-        if (!File.Exists(folderPath))
+        catch (Exception ex)
         {
-            Directory.CreateDirectory(folderPath);
+            Console.WriteLine("Unhandled exception in DBStats:");
+            Console.WriteLine(ex.ToString());
         }
-
-        string connectionString = $"Data Source={Path.Combine(folderPath, "dbstats.db")}";
-
-        using var connection = new SqliteConnection(connectionString);
-        connection.Open();
-
-        InitializeCommands(connection);
-        DataBaseInitializer.Initialize(connection);
-        DataBaseInserter.Insert(connection, match, profiles);
     }
 
     private static void CheckForDuplicates(string carnagePath)
@@ -68,47 +91,42 @@ class Program
         }
 
         // TODO: TEMPORAL PATH.
-        string lastHashPath = @"C:\Users\maste\OneDrive\Documents\Halo\DBStats\Duplicates\last_hash.json";
+        string processedHashesPath = @"C:\Users\maste\OneDrive\Documents\Halo\DBStats\Duplicates\processed_hashes.json";
 
-        string lastHash = File.Exists(lastHashPath) ? File.ReadAllText(lastHashPath) : string.Empty;
-
-        if (matchHash == lastHash)
+        List<string> processedHashes = [];
+        if (File.Exists(processedHashesPath))
         {
-            throw new InvalidOperationException("Error: duplicated file detected, aborting.");
+            string json = File.ReadAllText(processedHashesPath);
+            processedHashes = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
         }
 
-        File.WriteAllText(lastHashPath, matchHash);
+        if (processedHashes.Contains(matchHash))
+        {
+            Console.WriteLine($"Skipping duplicate file with hash: {matchHash}");
+            return;
+        }
+
+        processedHashes.Add(matchHash);
+        string updatedJson = System.Text.Json.JsonSerializer.Serialize(processedHashes);
+        File.WriteAllText(processedHashesPath, updatedJson);
     }
 
-    private static void InitializeCommands(SqliteConnection connection)
+    private static void SaveProcessedCarnage(string initialPath)
     {
-        using (var cmd = connection.CreateCommand())
+        string carnagesDirectory = Path.GetDirectoryName(initialPath)
+            ?? throw new NullReferenceException("Error: carnagesDirectory is null");
+
+        string processedCarnages = Path.Combine(carnagesDirectory, "Processed");
+
+        if (!Directory.Exists(processedCarnages))
         {
-            cmd.CommandText = "PRAGMA foreign_keys = ON;";
-            cmd.ExecuteNonQuery();
+            Directory.CreateDirectory(processedCarnages);
         }
 
-        using (var cmd = connection.CreateCommand())
-        {
-            cmd.CommandText = "PRAGMA table_info('Teams');";
-            using var reader = cmd.ExecuteReader();
+        string carnageName = Path.GetFileName(initialPath);
+        string destPath = Path.Combine(processedCarnages, carnageName);
 
-            while (reader.Read())
-            {
-                Console.WriteLine($"col: {reader["name"]} type: {reader["type"]} pk: {reader["pk"]}");
-            }
-        }
-
-        using (var cmd = connection.CreateCommand())
-        {
-            cmd.CommandText = "PRAGMA foreign_key_list('Teams');";
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                Console.WriteLine($"fk: from {reader["from"]} -> {reader["table"]}.{reader["to"]} ondelete={reader["on_delete"]}");
-            }
-        }
+        File.Move(initialPath, destPath);
     }
 
 }

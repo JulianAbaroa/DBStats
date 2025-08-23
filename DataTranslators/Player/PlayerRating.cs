@@ -7,7 +7,6 @@ public class PlayerRating
 {
     public static double GetRating(Combat combat, Breakdown breakdown, Medals medals, Survivability survivability, Penalties penalties)
     {
-        // --- parametros originales (apenas tocados) ---
         const double MAX_TIME_MINUTES = 10.0;
         const double BASE = 1000.0;
 
@@ -24,18 +23,15 @@ public class PlayerRating
         const double GRENADE_KILL_WEIGHT = 35;
         const double MELEE_KILL_WEIGHT = 18;
 
-        // --- tiempo / scaling (igual que antes) ---
         double actualMinutes = Math.Max(1.0, survivability.MinutesPlayed);
         double cappedMinutes = Math.Min(actualMinutes, MAX_TIME_MINUTES);
         double timeScale = cappedMinutes / actualMinutes;
 
-        // --- conteos escalados ---
         double scaledKills = combat.Kills * timeScale;
         double scaledAssists = combat.Assists * timeScale;
         double scaledInvolvements = combat.Involvements * timeScale;
         double scaledDeaths = combat.Deaths * timeScale;
 
-        // --- combate (igual a lo que tenías) ---
         double combatRaw =
             Math.Sqrt(scaledKills) * KILL_WEIGHT +
             Math.Sqrt(scaledAssists) * ASSIST_WEIGHT +
@@ -50,7 +46,6 @@ public class PlayerRating
 
         double combatScore = combatRaw * efficiencyMultiplier;
 
-        // --- breakdown (igual) ---
         double scaledWeapon = breakdown.WeaponKills * timeScale;
         double scaledGrenade = breakdown.GrenadeKills * timeScale;
         double scaledMelee = breakdown.MeleeKills * timeScale;
@@ -65,7 +60,6 @@ public class PlayerRating
         double ksrClamp = Math.Clamp(breakdown.KillSuccessRatio, 0.0, 1.5);
         breakdownScore *= 0.9 + 0.2 * ksrClamp;
 
-        // --- medals (igual) ---
         double baseMedalsScore = 0.0;
         foreach (var medal in medals.MedalsInfo.Types)
         {
@@ -80,33 +74,24 @@ public class PlayerRating
         double medalsFactor = 0.75 + (medals.MedalsPerMinute * 0.5);
         double medalsScore = scaledBaseMedals * medalsEfficiency * medalsFactor;
 
-        // --- supervivencia y penalizaciones (igual) ---
         double survivalScore = survivability.AliveTimeRatio * 40.0 * (cappedMinutes / MAX_TIME_MINUTES);
         double penaltyScore = penalties.Betrayals * 100.0;
 
-        // --- SUMA base de todos los componentes (antes del spread) ---
         double extra = combatScore + breakdownScore + medalsScore + survivalScore - penaltyScore;
 
-        // --- NUEVO: skillFactor para exponer la diferencia entre malos/buenos ---
-        // Normalizamos KDA y KSR (ambos entre 0..1), combinamos y aplicamos exponenciación
-        // para crear una curva que da poco a malos y mucho a top players.
-        double kdaNorm = (kdaClamp - 0.5) / (3.0 - 0.5);   // 0..1
-        double ksrNorm = ksrClamp / 1.5;                   // 0..1
-        double skillRaw = 0.6 * kdaNorm + 0.4 * ksrNorm;   // pondera KDA por encima de KSR
+        double kdaNorm = (kdaClamp - 0.5) / (3.0 - 0.5);
+        double ksrNorm = ksrClamp / 1.5;
+        double skillRaw = 0.6 * kdaNorm + 0.4 * ksrNorm;
 
-        // parámetros de tuning: exponent y escala final controlan cuánto "spread" damos.
-        // Con los valores actuales skillFactor ~= 0.6 .. 10.0
         const double SKILL_EXPONENT = 2.2;
         const double SKILL_SCALE = 9.4;
         const double SKILL_BASE = 0.6;
 
         double skillFactor = SKILL_BASE + Math.Pow(skillRaw, SKILL_EXPONENT) * SKILL_SCALE;
 
-        // aplicación: escalamos el 'extra' por skillFactor y sumamos la base inmutable (1000)
         double scaledExtra = extra * skillFactor;
         double final = BASE + scaledExtra;
 
-        // protección contra NaN/Inf y aseguramos que el peor caso sea el BASE (1000)
         if (double.IsNaN(final) || double.IsInfinity(final))
         {
             final = BASE;

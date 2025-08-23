@@ -194,7 +194,9 @@ public class CarnageReportParser
         {
             double opponentAverageRating = teams
                 .Where(t => t.Color != currentTeam.Color)
-                .Average(t => t.Rating);
+                .Select(t => t.Rating)
+                .DefaultIfEmpty(0)
+                .Average();
 
             double difficultyFactor = opponentAverageRating - currentTeam.Rating;
 

@@ -237,10 +237,10 @@ public class DataBaseInitializer
             }
 
             var createPlayersTable = @"CREATE TABLE IF NOT EXISTS Players (
+                player_match_id INTEGER PRIMARY KEY AUTOINCREMENT,  
                 player_id TEXT NOT NULL,
                 team_id INTEGER NOT NULL,
                 rating REAL NOT NULL,
-                PRIMARY KEY (player_id, team_id),
                 FOREIGN KEY(player_id) REFERENCES Profiles(player_id) ON DELETE CASCADE,
                 FOREIGN KEY(team_id) REFERENCES Teams(team_id) ON DELETE CASCADE
             )";
@@ -254,8 +254,7 @@ public class DataBaseInitializer
 
             var createCombatTable = @"CREATE TABLE IF NOT EXISTS Combat (
                 combat_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 kills INTEGER NOT NULL,
                 kills_per_minute REAL NOT NULL,
                 deaths INTEGER NOT NULL,
@@ -266,7 +265,7 @@ public class DataBaseInitializer
                 consecutive_kills INTEGER NOT NULL,
                 kill_death_ratio REAL NOT NULL,
                 kill_death_assists_ratio REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id)  ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -278,8 +277,7 @@ public class DataBaseInitializer
 
             var createBreakdownTable = @"CREATE TABLE IF NOT EXISTS Breakdown (
                 breakdown_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 weapon_kills INTEGER NOT NULL,
                 grenade_kills INTEGER NOT NULL,
                 melee_kills INTEGER NOT NULL,
@@ -289,7 +287,7 @@ public class DataBaseInitializer
                 melee_kills_ratio REAL NOT NULL,
                 other_kills_ratio REAL NOT NULL,
                 kill_success_ratio REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -301,15 +299,14 @@ public class DataBaseInitializer
 
             var createRivalriesTable = @"CREATE TABLE IF NOT EXISTS Rivalries (
                 rivalries_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 most_killed_player TEXT NOT NULL,
                 most_killed_count INTEGER NOT NULL,
                 most_killed_kill_ratio REAL NOT NULL,
                 most_killer_player TEXT NOT NULL,
                 most_killer_count INTEGER NOT NULL,
                 most_killer_death_ratio REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -321,12 +318,11 @@ public class DataBaseInitializer
 
             var createSurvivabilityTable = @"CREATE TABLE IF NOT EXISTS Survivability (
                 survivability_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 minutes_alive REAL NOT NULL,
                 minutes_played REAL NOT NULL,
                 alive_time_ratio REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -338,12 +334,11 @@ public class DataBaseInitializer
 
             var createChoiceTable = @"CREATE TABLE IF NOT EXISTS Choice (
                 choice_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 most_used_weapon TEXT NOT NULL,
                 most_used_weapon_kills INTEGER NOT NULL,
                 most_used_weapon_kills_ratio REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -355,12 +350,11 @@ public class DataBaseInitializer
 
             var createMedalsTable = @"CREATE TABLE IF NOT EXISTS Medals (
                 medals_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 total_medals INTEGER NOT NULL,
                 medals_per_kill REAL NOT NULL,
                 medals_per_minute REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -387,13 +381,12 @@ public class DataBaseInitializer
 
             var createPenaltiesTable = @"CREATE TABLE IF NOT EXISTS Penalties (
                 penalties_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 suicides INTEGER NOT NULL,
                 suicides_per_death REAL NOT NULL,
                 betrayals INTEGER NOT NULL,
                 betrayals_per_kill REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -405,10 +398,9 @@ public class DataBaseInitializer
 
             var createSlayerTable = @"CREATE TABLE IF NOT EXISTS Slayer (
                 slayer_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 rating REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -420,12 +412,11 @@ public class DataBaseInitializer
 
             var createCTFTable = @"CREATE TABLE IF NOT EXISTS CaptureTheFlag (
                 ctf_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 flag_captures INTEGER NOT NULL,
                 flag_recovers INTEGER NOT NULL,
                 flag_carry_time REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -437,11 +428,10 @@ public class DataBaseInitializer
 
             var createOddballTable = @"CREATE TABLE IF NOT EXISTS Oddball (
                 oddball_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 carry_time REAL NOT NULL,
                 ball_kills INTEGER NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -453,10 +443,9 @@ public class DataBaseInitializer
 
             var createKOTHTable = @"CREATE TABLE IF NOT EXISTS KingOfTheHill (
                 koth_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 time_in_hill REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -468,10 +457,9 @@ public class DataBaseInitializer
 
             var createJuggernautTable = @"CREATE TABLE IF NOT EXISTS Juggernaut (
                 juggernaut_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 juggernaut_time REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -483,11 +471,10 @@ public class DataBaseInitializer
 
             var createInfectionTable = @"CREATE TABLE IF NOT EXISTS Infection (
                 infection_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 survival_time REAL NOT NULL,
                 infections INTEGER NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -499,10 +486,9 @@ public class DataBaseInitializer
 
             var createTerritoriesTable = @"CREATE TABLE IF NOT EXISTS Territories (
                 territories_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 captures INTEGER NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -514,13 +500,12 @@ public class DataBaseInitializer
 
             var createAssaultTable = @"CREATE TABLE IF NOT EXISTS Assault (
                 assault_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 bombs_planted INTEGER NOT NULL,
                 detonations INTEGER NOT NULL,
                 bomb_carry_time REAL NOT NULL,
                 defuses INTEGER NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -532,10 +517,9 @@ public class DataBaseInitializer
 
             var createStockpileTable = @"CREATE TABLE IF NOT EXISTS Stockpile (
                 stockpile_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 carry_time REAL NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -547,10 +531,9 @@ public class DataBaseInitializer
 
             var createHeadHunterTable = @"CREATE TABLE IF NOT EXISTS HeadHunter (
                 head_hunter_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
+                player_match_id INTEGER NOT NULL,
                 max_skulls INTEGER NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -562,9 +545,8 @@ public class DataBaseInitializer
 
             var createActionSackTable = @"CREATE TABLE IF NOT EXISTS ActionSack (
                 action_sack_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id TEXT NOT NULL,
-                team_id INTEGER NOT NULL,
-                FOREIGN KEY(player_id, team_id) REFERENCES Players(player_id, team_id) ON DELETE CASCADE
+                player_match_id INTEGER NOT NULL,
+                FOREIGN KEY(player_match_id) REFERENCES Players(player_match_id) ON DELETE CASCADE
             )";
 
             using (var cmd = connection.CreateCommand())
@@ -579,18 +561,34 @@ public class DataBaseInitializer
                 "CREATE INDEX IF NOT EXISTS idx_matches_timestamp ON Matches(match_timestamp);",
                 "CREATE INDEX IF NOT EXISTS idx_matches_gametype_timestamp ON Matches(gametype_name, match_timestamp);",
                 "CREATE INDEX IF NOT EXISTS idx_teams_match ON Teams(match_id);",
+
                 "CREATE INDEX IF NOT EXISTS idx_players_playerid ON Players(player_id);",
                 "CREATE INDEX IF NOT EXISTS idx_players_teamid ON Players(team_id);",
-                "CREATE INDEX IF NOT EXISTS idx_combat_player_team ON Combat(player_id, team_id);",
-                "CREATE INDEX IF NOT EXISTS idx_breakdown_player_team ON Breakdown(player_id, team_id);",
-                "CREATE INDEX IF NOT EXISTS idx_medals_player ON Medals(player_id);",
+
+                "CREATE INDEX IF NOT EXISTS idx_combat_player_match ON Combat(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_breakdown_player_match ON Breakdown(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_rivalries_player_match ON Rivalries(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_survivability_player_match ON Survivability(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_choice_player_match ON Choice(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_medals_player_match ON Medals(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_penalties_player_match ON Penalties(player_match_id);",
+
+                "CREATE INDEX IF NOT EXISTS idx_slayer_player_match ON Slayer(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_ctf_player_match ON CaptureTheFlag(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_oddball_player_match ON Oddball(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_koth_player_match ON KingOfTheHill(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_juggernaut_player_match ON Juggernaut(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_infection_player_match ON Infection(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_territories_player_match ON Territories(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_assault_player_match ON Assault(player_match_id);",
+                "CREATE INDEX IF NOT EXISTS idx_stockpile_player_match ON Stockpile(player_match_id);",
+
                 "CREATE INDEX IF NOT EXISTS idx_medalsinfo_medalsid ON MedalsInfo(medals_id);",
                 "CREATE INDEX IF NOT EXISTS idx_profiles_playername ON Profiles(player_name COLLATE NOCASE);",
                 "CREATE INDEX IF NOT EXISTS idx_profiles_lastseen ON Profiles(last_seen);",
-                "CREATE INDEX IF NOT EXISTS idx_choice_player ON Choice(player_id);",
-                "CREATE INDEX IF NOT EXISTS idx_matches_gametype ON Matches(gametype_name);",
-                "CREATE INDEX IF NOT EXISTS idx_combat_team ON Combat(team_id);"
+                "CREATE INDEX IF NOT EXISTS idx_matches_gametype ON Matches(gametype_name);"
             };
+
 
 
             foreach (var idx in indexCommands)

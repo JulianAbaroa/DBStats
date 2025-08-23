@@ -1,3 +1,4 @@
+using System.Formats.Asn1;
 using DBStats.DataTypes;
 using DBStats.DataTypes.GameTypes;
 using DBStats.DataTypes.Player;
@@ -69,59 +70,59 @@ public class DataBaseInserter
 
             foreach (var player in team.Players)
             {
-                AddPlayer(connection, player, teamID);
-                AddCombat(connection, player.Combat, player.PlayerID, teamID);
-                AddBreakdown(connection, player.Breakdown, player.PlayerID, teamID);
-                AddRivalries(connection, player.Rivalries, player.PlayerID, teamID);
-                AddSurvivability(connection, player.Survivability, player.PlayerID, teamID);
-                AddChoice(connection, player.Choice, player.PlayerID, teamID);
-                long medalsID = AddMedals(connection, player.Medals, player.PlayerID, teamID);
+                long player_match_id = AddPlayer(connection, player, teamID);
+                AddCombat(connection, player.Combat, player_match_id);
+                AddBreakdown(connection, player.Breakdown, player_match_id);
+                AddRivalries(connection, player.Rivalries, player_match_id);
+                AddSurvivability(connection, player.Survivability, player_match_id);
+                AddChoice(connection, player.Choice, player_match_id);
+                long medalsID = AddMedals(connection, player.Medals, player_match_id);
                 AddMedalsInfo(connection, player.Medals.MedalsInfo, medalsID);
-                AddPenalties(connection, player.Penalties, player.PlayerID, teamID);
+                AddPenalties(connection, player.Penalties, player_match_id);
 
                 if (player.GameMode is Slayer slayer)
                 {
-                    AddSlayer(connection, slayer, player.PlayerID, teamID);
+                    AddSlayer(connection, slayer, player_match_id);
                 }
                 else if (player.GameMode is CaptureTheFlag captureTheFlag)
                 {
-                    AddCaptureTheFlag(connection, captureTheFlag, player.PlayerID, teamID);
+                    AddCaptureTheFlag(connection, captureTheFlag, player_match_id);
                 }
                 else if (player.GameMode is Oddball oddball)
                 {
-                    AddOddball(connection, oddball, player.PlayerID, teamID);
+                    AddOddball(connection, oddball, player_match_id);
                 }
                 else if (player.GameMode is KingOfTheHill kingOfTheHill)
                 {
-                    AddKingOfTheHill(connection, kingOfTheHill, player.PlayerID, teamID);
+                    AddKingOfTheHill(connection, kingOfTheHill, player_match_id);
                 }
                 else if (player.GameMode is Juggernaut juggernaut)
                 {
-                    AddJuggernaut(connection, juggernaut, player.PlayerID, teamID);
+                    AddJuggernaut(connection, juggernaut, player_match_id);
                 }
                 else if (player.GameMode is Infection infection)
                 {
-                    AddInfection(connection, infection, player.PlayerID, teamID);
+                    AddInfection(connection, infection, player_match_id);
                 }
                 else if (player.GameMode is Territories territories)
                 {
-                    AddTerritories(connection, territories, player.PlayerID, teamID);
+                    AddTerritories(connection, territories, player_match_id);
                 }
                 else if (player.GameMode is Assault assault)
                 {
-                    AddAssault(connection, assault, player.PlayerID, teamID);
+                    AddAssault(connection, assault, player_match_id);
                 }
                 else if (player.GameMode is Stockpile stockpile)
                 {
-                    AddStockpile(connection, stockpile, player.PlayerID, teamID);
+                    AddStockpile(connection, stockpile, player_match_id);
                 }
                 else if (player.GameMode is HeadHunter headHunter)
                 {
-                    AddHeadHunter(connection, headHunter, player.PlayerID, teamID);
+                    AddHeadHunter(connection, headHunter, player_match_id);
                 }
                 else if (player.GameMode is ActionSack)
                 {
-                    AddActionSack(connection, player.PlayerID, teamID);
+                    AddActionSack(connection, player_match_id);
                 }
             }
         }
@@ -466,7 +467,7 @@ public class DataBaseInserter
     private static void AddProfile(SqliteConnection connection, Profile profile)
     {
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = @"INSERT OR REPLACE INTO Profiles (
+        cmd.CommandText = @"INSERT INTO Profiles (
             player_id,
             player_name,
             last_seen
@@ -474,7 +475,9 @@ public class DataBaseInserter
             $player_id,
             $player_name,
             $last_seen
-        );";
+        ) ON CONFLICT(player_id) DO UPDATE SET
+            player_name = excluded.player_name,
+            last_seen = excluded.last_seen;";
 
         cmd.Parameters.AddWithValue("$player_id", profile.PlayerID);
         cmd.Parameters.AddWithValue("$player_name", profile.PlayerName);
@@ -490,7 +493,7 @@ public class DataBaseInserter
     private static void AddCustomization(SqliteConnection connection, Customization customization, string playerID)
     {
         using var cmd = connection.CreateCommand();
-        cmd.CommandText = @"INSERT OR REPLACE INTO Customizations (
+        cmd.CommandText = @"INSERT INTO Customizations (
             player_id,
             service_id,
             clan_tag,
@@ -502,7 +505,11 @@ public class DataBaseInserter
             $clan_tag,
             $nameplate_path,
             $emblem_path
-        );";
+        ) ON CONFLICT(player_id) DO UPDATE SET
+            service_id = excluded.service_id,
+            clan_tag = excluded.clan_tag,
+            nameplate_path = excluded.nameplate_path,
+            emblem_path = excluded.emblem_path;";
 
         cmd.Parameters.AddWithValue("$player_id", playerID);
         cmd.Parameters.AddWithValue("$service_id", customization.ServiceID);
@@ -517,36 +524,59 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddPlayer(SqliteConnection connection, PlayerMatchStats player, long teamID)
+    private static long AddPlayer(SqliteConnection connection, PlayerMatchStats player, long teamID)
     {
-        using var cmd = connection.CreateCommand();
-        cmd.CommandText = @"INSERT INTO Players (
-            player_id,
-            team_id,
-            rating
-        ) VALUES (
-            $player_id,
-            $team_id,
-            $rating
-        );";
+        using var selectCMD = connection.CreateCommand();
+        selectCMD.CommandText = @"
+            SELECT player_match_id
+            FROM Players
+            WHERE player_id = $player_id AND team_id = $team_id
+            LIMIT 1;
+        ";
 
-        cmd.Parameters.AddWithValue("$player_id", player.PlayerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
-        cmd.Parameters.AddWithValue("$rating", player.Rating);
+        selectCMD.Parameters.AddWithValue("$player_id", player.PlayerID);
+        selectCMD.Parameters.AddWithValue("$team_id", teamID);
 
-        int rows = cmd.ExecuteNonQuery();
+        object? existing = selectCMD.ExecuteScalar();
+
+        if (existing != null && existing != DBNull.Value)
+        {
+            return Convert.ToInt64(existing);
+        }
+
+        using var insertCMD = connection.CreateCommand();
+        insertCMD.CommandText = @"
+            INSERT INTO Players (player_id, team_id, rating)
+            VALUES ($player_id, $team_id, $rating)
+        ";
+
+        insertCMD.Parameters.AddWithValue("$player_id", player.PlayerID);
+        insertCMD.Parameters.AddWithValue("$team_id", teamID);
+        insertCMD.Parameters.AddWithValue("$rating", player.Rating);
+
+        int rows = insertCMD.ExecuteNonQuery();
         if (rows == 0)
         {
-            Console.WriteLine($"[WARN] Insert ignorado en {cmd.CommandText}");
+            Console.WriteLine($"[WARN] Insert ignorado en Players: {insertCMD.CommandText}");
         }
+
+        using var lastIDCMD = connection.CreateCommand();
+        lastIDCMD.CommandText = "SELECT last_insert_rowid();";
+        object? result = lastIDCMD.ExecuteScalar();
+
+        if (result == null || result == DBNull.Value)
+        {
+            throw new InvalidOperationException("Error: Could not get generated player_match_id.");
+        }
+
+        return Convert.ToInt64(result);
     }
 
-    private static void AddCombat(SqliteConnection connection, Combat combat, string playerID, long teamID)
+    private static void AddCombat(SqliteConnection connection, Combat combat, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Combat (
-            player_id,
-            team_id,
+            player_match_id,
             kills,
             kills_per_minute,
             deaths,
@@ -558,8 +588,7 @@ public class DataBaseInserter
             kill_death_ratio,
             kill_death_assists_ratio
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $kills,
             $kills_per_minute,
             $deaths,
@@ -572,8 +601,7 @@ public class DataBaseInserter
             $kill_death_assists_ratio
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$kills", combat.Kills);
         cmd.Parameters.AddWithValue("$kills_per_minute", combat.KillsPerMinute);
         cmd.Parameters.AddWithValue("$deaths", combat.Deaths);
@@ -592,12 +620,11 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddBreakdown(SqliteConnection connection, Breakdown breakdown, string playerID, long teamID)
+    private static void AddBreakdown(SqliteConnection connection, Breakdown breakdown, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Breakdown (
-            player_id,
-            team_id,
+            player_match_id,
             weapon_kills,
             grenade_kills,
             melee_kills,
@@ -608,8 +635,7 @@ public class DataBaseInserter
             other_kills_ratio,
             kill_success_ratio
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $weapon_kills,
             $grenade_kills,
             $melee_kills,
@@ -621,8 +647,7 @@ public class DataBaseInserter
             $kill_success_ratio
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$weapon_kills", breakdown.WeaponKills);
         cmd.Parameters.AddWithValue("$grenade_kills", breakdown.GrenadeKills);
         cmd.Parameters.AddWithValue("$melee_kills", breakdown.MeleeKills);
@@ -640,12 +665,11 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddRivalries(SqliteConnection connection, Rivalries rivalries, string playerID, long teamID)
+    private static void AddRivalries(SqliteConnection connection, Rivalries rivalries, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Rivalries (
-            player_id,
-            team_id,
+            player_match_id,
             most_killed_player,
             most_killed_count,
             most_killed_kill_ratio,
@@ -653,8 +677,7 @@ public class DataBaseInserter
             most_killer_count,
             most_killer_death_ratio
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $most_killed_player,
             $most_killed_count,
             $most_killed_kill_ratio,
@@ -663,8 +686,7 @@ public class DataBaseInserter
             $most_killer_death_ratio
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$most_killed_player", rivalries.MostKilledPlayer);
         cmd.Parameters.AddWithValue("$most_killed_count", rivalries.MostKilledCount);
         cmd.Parameters.AddWithValue("$most_killed_kill_ratio", rivalries.MostKilledKillRatio);
@@ -679,25 +701,22 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddSurvivability(SqliteConnection connection, Survivability survivability, string playerID, long teamID)
+    private static void AddSurvivability(SqliteConnection connection, Survivability survivability, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Survivability (
-            player_id,
-            team_id,
+            player_match_id,
             minutes_alive,
             minutes_played,
             alive_time_ratio
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $minutes_alive,
             $minutes_played,
             $alive_time_ratio
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$minutes_alive", survivability.MinutesAlive);
         cmd.Parameters.AddWithValue("$minutes_played", survivability.MinutesPlayed);
         cmd.Parameters.AddWithValue("$alive_time_ratio", survivability.AliveTimeRatio);
@@ -709,25 +728,22 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddChoice(SqliteConnection connection, Choice choice, string playerID, long teamID)
+    private static void AddChoice(SqliteConnection connection, Choice choice, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Choice (
-            player_id,
-            team_id,
+            player_match_id,
             most_used_weapon,
             most_used_weapon_kills,
             most_used_weapon_kills_ratio
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $most_used_weapon,
             $most_used_weapon_kills,
             $most_used_weapon_kills_ratio
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$most_used_weapon", choice.MostUsedWeapon);
         cmd.Parameters.AddWithValue("$most_used_weapon_kills", choice.MostUsedWeaponKills);
         cmd.Parameters.AddWithValue("$most_used_weapon_kills_ratio", choice.MostUsedWeaponKillsRatio);
@@ -739,25 +755,22 @@ public class DataBaseInserter
         }
     }
 
-    private static long AddMedals(SqliteConnection connection, Medals medals, string playerID, long teamID)
+    private static long AddMedals(SqliteConnection connection, Medals medals, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Medals (
-            player_id,
-            team_id,
+            player_match_id,
             total_medals,
             medals_per_kill,
             medals_per_minute
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $total_medals,
             $medals_per_kill,
             $medals_per_minute
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$total_medals", medals.TotalMedals);
         cmd.Parameters.AddWithValue("$medals_per_kill", medals.MedalsPerKill);
         cmd.Parameters.AddWithValue("$medals_per_minute", medals.MedalsPerMinute);
@@ -819,27 +832,24 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddPenalties(SqliteConnection connection, Penalties penalties, string playerID, long teamID)
+    private static void AddPenalties(SqliteConnection connection, Penalties penalties, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Penalties (
-            player_id,
-            team_id,
+            player_match_id,
             suicides,
             suicides_per_death,
             betrayals,
             betrayals_per_kill
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $suicides,
             $suicides_per_death,
             $betrayals,
             $betrayals_per_kill
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$suicides", penalties.Suicides);
         cmd.Parameters.AddWithValue("$suicides_per_death", penalties.SuicidesPerDeath);
         cmd.Parameters.AddWithValue("$betrayals", penalties.Betrayals);
@@ -852,21 +862,18 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddSlayer(SqliteConnection connection, Slayer slayer, string playerID, long teamID)
+    private static void AddSlayer(SqliteConnection connection, Slayer slayer, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Slayer (
-            player_id,
-            team_id,
+            player_match_id,
             rating
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $rating
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$rating", slayer.Rating);
 
         int rows = cmd.ExecuteNonQuery();
@@ -876,25 +883,22 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddCaptureTheFlag(SqliteConnection connection, CaptureTheFlag captureTheFlag, string playerID, long teamID)
+    private static void AddCaptureTheFlag(SqliteConnection connection, CaptureTheFlag captureTheFlag, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO CaptureTheFlag (
-            player_id,
-            team_id,
+            player_match_id,
             flag_captures,
             flag_recovers,
             flag_carry_time
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $flag_captures,
             $flag_recovers,
             $flag_carry_time
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$flag_captures", captureTheFlag.FlagCaptures);
         cmd.Parameters.AddWithValue("$flag_recovers", captureTheFlag.FlagRecovers);
         cmd.Parameters.AddWithValue("$flag_carry_time", captureTheFlag.FlagCarryTime);
@@ -906,23 +910,20 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddOddball(SqliteConnection connection, Oddball oddball, string playerID, long teamID)
+    private static void AddOddball(SqliteConnection connection, Oddball oddball, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Oddball (
-            player_id,
-            team_id,
+            player_match_id,
             carry_time,
             ball_kills
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $carry_time,
             $ball_kills
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$carry_time", oddball.CarryTime);
         cmd.Parameters.AddWithValue("$ball_kills", oddball.BallKills);
 
@@ -933,21 +934,18 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddKingOfTheHill(SqliteConnection connection, KingOfTheHill kingOfTheHill, string playerID, long teamID)
+    private static void AddKingOfTheHill(SqliteConnection connection, KingOfTheHill kingOfTheHill, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO KingOfTheHill (
-            player_id,
-            team_id,
+            player_match_id,
             time_in_hill
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $time_in_hill
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$time_in_hill", kingOfTheHill.TimeinHill);
 
         int rows = cmd.ExecuteNonQuery();
@@ -957,21 +955,18 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddJuggernaut(SqliteConnection connection, Juggernaut juggernaut, string playerID, long teamID)
+    private static void AddJuggernaut(SqliteConnection connection, Juggernaut juggernaut, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Juggernaut (
-            player_id,
-            team_id,
+            player_match_id,
             juggernaut_time
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $juggernaut_time
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$juggernaut_time", juggernaut.JuggernautTime);
 
         int rows = cmd.ExecuteNonQuery();
@@ -981,23 +976,20 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddInfection(SqliteConnection connection, Infection infection, string playerID, long teamID)
+    private static void AddInfection(SqliteConnection connection, Infection infection, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Infection (
-            player_id,
-            team_id,
+            player_match_id,
             survival_time,
             infections
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $survival_time,
             $infections
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$survival_time", infection.SurvivalTime);
         cmd.Parameters.AddWithValue("$infections", infection.Infections);
 
@@ -1008,21 +1000,18 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddTerritories(SqliteConnection connection, Territories territories, string playerID, long teamID)
+    private static void AddTerritories(SqliteConnection connection, Territories territories, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Territories (
-            player_id,
-            team_id,
+            player_match_id,
             captures
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $captures
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$captures", territories.Captures);
 
         int rows = cmd.ExecuteNonQuery();
@@ -1032,27 +1021,24 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddAssault(SqliteConnection connection, Assault assault, string playerID, long teamID)
+    private static void AddAssault(SqliteConnection connection, Assault assault, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Assault (
-            player_id,
-            team_id,
+            player_match_id,
             bombs_planted,
             detonations,
             bomb_carry_time,
             defuses
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $bombs_planted,
             $detonations,
             $bomb_carry_time,
             $defuses
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$bombs_planted", assault.BombsPlanted);
         cmd.Parameters.AddWithValue("$detonations", assault.Detonations);
         cmd.Parameters.AddWithValue("$bomb_carry_time", assault.BombCarryTime);
@@ -1065,21 +1051,18 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddStockpile(SqliteConnection connection, Stockpile stockpile, string playerID, long teamID)
+    private static void AddStockpile(SqliteConnection connection, Stockpile stockpile, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Stockpile (
-            player_id,
-            team_id,
+            player_match_id,
             carry_time
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $carry_time
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$carry_time", stockpile.CarryTime);
 
         int rows = cmd.ExecuteNonQuery();
@@ -1089,21 +1072,18 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddHeadHunter(SqliteConnection connection, HeadHunter headHunter, string playerID, long teamID)
+    private static void AddHeadHunter(SqliteConnection connection, HeadHunter headHunter, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO HeadHunter (
-            player_id,
-            team_id,
+            player_match_id,
             max_skulls
         ) VALUES (
-            $player_id,
-            $team_id,
+            $player_match_id,
             $max_skulls
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
         cmd.Parameters.AddWithValue("$max_skulls", headHunter.MaxSkulls);
 
         int rows = cmd.ExecuteNonQuery();
@@ -1113,19 +1093,16 @@ public class DataBaseInserter
         }
     }
 
-    private static void AddActionSack(SqliteConnection connection, string playerID, long teamID)
+    private static void AddActionSack(SqliteConnection connection, long playerMatchID)
     {
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO ActionSack (
-            player_id,
-            team_id
+            player_match_id
         ) VALUES (
-            $player_id,
-            $team_id
+            $player_id
         );";
 
-        cmd.Parameters.AddWithValue("$player_id", playerID);
-        cmd.Parameters.AddWithValue("$team_id", teamID);
+        cmd.Parameters.AddWithValue("$player_match_id", playerMatchID);
 
         int rows = cmd.ExecuteNonQuery();
         if (rows == 0)

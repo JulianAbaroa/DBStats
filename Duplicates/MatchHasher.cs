@@ -48,7 +48,7 @@ public class MatchHasher
             // Compute the SHA256 hash of the combined string
             using var sha256 = SHA256.Create();
             byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(dataToHash));
-            return BitConverter.ToString(hashBytes).Replace("-", "");
+            return Convert.ToHexString(hashBytes);
         }
         catch (Exception ex)
         {
