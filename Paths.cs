@@ -2,7 +2,7 @@ namespace DBStats;
 
 public class Paths
 {
-    // private const string BASE_PATH = @"C:\Users\maste\OneDrive\Documents"
+    //private const string BASE_PATH = @"C:\Users\maste\OneDrive\Documents";
     private const string BASE_PATH = "media/pi/MiDiscoExterno";
 
     public const string CARNAGES_DIR = BASE_PATH + @"\Halo\Carnages";
