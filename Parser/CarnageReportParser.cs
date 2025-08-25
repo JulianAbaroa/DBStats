@@ -153,7 +153,7 @@ public class CarnageReportParser
 
         foreach (var team in teams.Values)
         {
-            team.Rating = team.Players.Average(p => p.Rating);
+            team.Rating = team.Players.Select(p => p.Rating).DefaultIfEmpty(0).Average();
         }
 
         return teams.Values.ToList();

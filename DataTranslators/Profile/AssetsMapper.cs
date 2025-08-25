@@ -8,13 +8,10 @@ public class AssetsMapper
     private static readonly Dictionary<int, string> _nameplateMap = [];
     private static readonly Dictionary<int, EmblemPaths> _emblemMap = [];
 
-    // TODO: TEMPORAL PATH.
-    private const string CUSTOMIZATION_PATH = @"C:\Users\maste\OneDrive\Documents\Halo\Discord Bot\customization.xml";
-
     public static void LoadMaps()
     {
         var xmlDoc = new XmlDocument();
-        xmlDoc.Load(CUSTOMIZATION_PATH);
+        xmlDoc.Load(Paths.CUSTOMIZATION_PATH);
 
         XmlNodeList? nameplateNodes = xmlDoc.SelectNodes("//Nameplates/Nameplate")
             ?? throw new NullReferenceException("Error: nameplateNodes is null.");

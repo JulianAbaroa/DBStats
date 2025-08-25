@@ -16,10 +16,7 @@ class Program
         {
             Console.WriteLine("=== DBStats START ===");
 
-            // TODO: TEMPORAL PATH.
-            const string CARNAGES_PATH = @"C:\Users\maste\OneDrive\Documents\Halo\Carnages";
-
-            string[] carnagePaths = Directory.GetFiles(CARNAGES_PATH, "*.xml");
+            string[] carnagePaths = Directory.GetFiles(Paths.CARNAGES_DIR, "*.xml");
 
             Console.WriteLine($"Found {carnagePaths.Length} XML files to process.");
 
@@ -37,9 +34,13 @@ class Program
                     throw new FileNotFoundException($"Error: the file is not found in the path: {carnagePath}");
                 }
 
+                if (CheckForDuplicates(carnagePath))
+                {
+                    continue;
+                }
+
                 // Initialization.
                 AssetsMapper.LoadMaps();
-                CheckForDuplicates(carnagePath);
 
                 var carnageReport = new XmlDocument();
                 carnageReport.Load(carnagePath);
@@ -50,15 +51,12 @@ class Program
                 Match match = CarnageReportParser.ParseMatch(carnageReport, playerNodes, carnagePath);
                 List<Profile> profiles = ProfilesParser.ParseProfiles(playerNodes);
 
-                // TODO: TEMPORAL PATH.
-                string dataBasePath = @"C:\Users\maste\OneDrive\Documents\Halo\DBStats DataBase";
-
-                if (!File.Exists(dataBasePath))
+                if (!File.Exists(Paths.DATABASE_DIR))
                 {
-                    Directory.CreateDirectory(dataBasePath);
+                    Directory.CreateDirectory(Paths.DATABASE_DIR);
                 }
 
-                string connectionString = $"Data Source={Path.Combine(dataBasePath, "dbstats.db")}";
+                string connectionString = $"Data Source={Path.Combine(Paths.DATABASE_DIR, "dbstats.db")}";
 
                 using var connection = new SqliteConnection(connectionString);
                 connection.Open();
@@ -81,7 +79,7 @@ class Program
         }
     }
 
-    private static void CheckForDuplicates(string carnagePath)
+    private static bool CheckForDuplicates(string carnagePath)
     {
         string? matchHash = MatchHasher.ComputeMatchHash(carnagePath);
 
@@ -90,25 +88,24 @@ class Program
             throw new InvalidOperationException("Error: matchHash is not valid.");
         }
 
-        // TODO: TEMPORAL PATH.
-        string processedHashesPath = @"C:\Users\maste\OneDrive\Documents\Halo\DBStats\Duplicates\processed_hashes.json";
-
         List<string> processedHashes = [];
-        if (File.Exists(processedHashesPath))
+        if (File.Exists(Paths.SAVED_HASHES_PATH))
         {
-            string json = File.ReadAllText(processedHashesPath);
+            string json = File.ReadAllText(Paths.SAVED_HASHES_PATH);
             processedHashes = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
         }
 
         if (processedHashes.Contains(matchHash))
         {
             Console.WriteLine($"Skipping duplicate file with hash: {matchHash}");
-            return;
+            return true;
         }
 
         processedHashes.Add(matchHash);
         string updatedJson = System.Text.Json.JsonSerializer.Serialize(processedHashes);
-        File.WriteAllText(processedHashesPath, updatedJson);
+        File.WriteAllText(Paths.SAVED_HASHES_PATH, updatedJson);
+
+        return false;
     }
 
     private static void SaveProcessedCarnage(string initialPath)
