@@ -1,14 +1,21 @@
 namespace DBStats;
 
-public class Paths
+public static class Paths
 {
-    //private const string BASE_PATH = @"C:\Users\maste\OneDrive\Documents";
-    private const string BASE_PATH = "media/pi/MiDiscoExterno";
+#if LINUX
+    const string BASE_PATH = "/media/pi/MiDiscoExterno";
+#else
+    const string BASE_PATH = @"C:\Users\maste\OneDrive\Documents";
+#endif
 
-    public const string CARNAGES_DIR = BASE_PATH + @"\Halo\Carnages";
-    public const string DATABASE_DIR = BASE_PATH + @"\Halo\DBStats DataBase";
+    public static readonly string CarnagesDir = Path.Combine(BASE_PATH, "Halo", "Carnages");
+    public static readonly string DatabaseDir = Path.Combine(BASE_PATH, "Halo", "DBStats DataBase");
 
-    public static string SAVED_HASHES_PATH = Path.Combine(AppContext.BaseDirectory, "Duplicates", "processed_hashes.json");
+    public static readonly string SavedHashesPath = Path.Combine(
+        AppContext.BaseDirectory, "Duplicates", "processed_hashes.json"
+    );
 
-    public const string CUSTOMIZATION_PATH = BASE_PATH + @"\Halo\MCC Assets";
+    public static readonly string CustomizationPath = Path.Combine(
+        BASE_PATH, "Halo", "Discord Bot", "customization.xml"
+    );
 }

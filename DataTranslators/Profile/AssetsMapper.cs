@@ -11,7 +11,7 @@ public class AssetsMapper
     public static void LoadMaps()
     {
         var xmlDoc = new XmlDocument();
-        xmlDoc.Load(Paths.CUSTOMIZATION_PATH);
+        xmlDoc.Load(Paths.CustomizationPath);
 
         XmlNodeList? nameplateNodes = xmlDoc.SelectNodes("//Nameplates/Nameplate")
             ?? throw new NullReferenceException("Error: nameplateNodes is null.");

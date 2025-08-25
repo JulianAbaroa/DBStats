@@ -16,7 +16,7 @@ class Program
         {
             Console.WriteLine("=== DBStats START ===");
 
-            string[] carnagePaths = Directory.GetFiles(Paths.CARNAGES_DIR, "*.xml");
+            string[] carnagePaths = Directory.GetFiles(Paths.CarnagesDir, "*.xml");
 
             Console.WriteLine($"Found {carnagePaths.Length} XML files to process.");
 
@@ -51,12 +51,12 @@ class Program
                 Match match = CarnageReportParser.ParseMatch(carnageReport, playerNodes, carnagePath);
                 List<Profile> profiles = ProfilesParser.ParseProfiles(playerNodes);
 
-                if (!File.Exists(Paths.DATABASE_DIR))
+                if (!File.Exists(Paths.DatabaseDir))
                 {
-                    Directory.CreateDirectory(Paths.DATABASE_DIR);
+                    Directory.CreateDirectory(Paths.DatabaseDir);
                 }
 
-                string connectionString = $"Data Source={Path.Combine(Paths.DATABASE_DIR, "dbstats.db")}";
+                string connectionString = $"Data Source={Path.Combine(Paths.DatabaseDir, "dbstats.db")}";
 
                 using var connection = new SqliteConnection(connectionString);
                 connection.Open();
@@ -89,9 +89,9 @@ class Program
         }
 
         List<string> processedHashes = [];
-        if (File.Exists(Paths.SAVED_HASHES_PATH))
+        if (File.Exists(Paths.SavedHashesPath))
         {
-            string json = File.ReadAllText(Paths.SAVED_HASHES_PATH);
+            string json = File.ReadAllText(Paths.SavedHashesPath);
             processedHashes = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
         }
 
@@ -103,7 +103,7 @@ class Program
 
         processedHashes.Add(matchHash);
         string updatedJson = System.Text.Json.JsonSerializer.Serialize(processedHashes);
-        File.WriteAllText(Paths.SAVED_HASHES_PATH, updatedJson);
+        File.WriteAllText(Paths.SavedHashesPath, updatedJson);
 
         return false;
     }
