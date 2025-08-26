@@ -1,4 +1,3 @@
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace DBStats;
@@ -13,24 +12,97 @@ public static class Paths
 
     static Paths()
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        // 1) Override por variable de entorno (si quieres forzar desde la Pi/Windows)
+        var envOverride = Environment.GetEnvironmentVariable("DBSTATS_BASE_PATH");
+        if (!string.IsNullOrWhiteSpace(envOverride))
         {
-            BASE_PATH = "/media/pi/external_drive";
+            BASE_PATH = envOverride;
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            BASE_PATH = DetectLinuxExternalDriveWithHalo() ?? Path.Combine("/home", Environment.UserName);
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            BASE_PATH = @"C:\Users\maste\OneDrive\Documents";
+            BASE_PATH = DetectWindowsHaloPath() ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         }
         else
         {
             BASE_PATH = string.Empty;
         }
 
-        CarnagesDir = Path.Combine(BASE_PATH, "Halo", "Carnages");
-        DatabaseDir = Path.Combine(BASE_PATH, "Halo", "DBStats DataBase");
-        SavedHashesPath = Path.Combine(
-            AppContext.BaseDirectory, "Duplicates", "processed_hashes.json"
-        );
-        CustomizationPath = Path.Combine(BASE_PATH, "Halo", "Discord Bot", "customization.xml");
+        CarnagesDir = PathCombineSafe(BASE_PATH, "Halo", "Carnages");
+        DatabaseDir = PathCombineSafe(BASE_PATH, "Halo", "DBStats DataBase");
+        SavedHashesPath = PathCombineSafe(AppContext.BaseDirectory, "Duplicates", "processed_hashes.json");
+        CustomizationPath = PathCombineSafe(BASE_PATH, "Halo", "Discord Bot", "customization.xml");
+    }
+
+    private static string? DetectLinuxExternalDriveWithHalo()
+    {
+        var user = Environment.UserName;
+        var candidateRoots = new List<string>
+        {
+            Path.Combine("/media", user),
+            "/media/pi",
+            "/media",
+            "/mnt"
+        };
+
+        foreach (var root in candidateRoots)
+        {
+            try
+            {
+                if (!Directory.Exists(root)) continue;
+
+                if (Directory.Exists(Path.Combine(root, "Halo")))
+                {
+                    return root;
+                }
+
+                foreach (var sub in Directory.GetDirectories(root))
+                {
+                    if (Directory.Exists(Path.Combine(sub, "Halo")))
+                    {
+                        return sub;
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        return null;
+    }
+
+    private static string DetectWindowsHaloPath()
+    {
+        var oneDrive = Environment.GetEnvironmentVariable("OneDrive");
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        if (!string.IsNullOrWhiteSpace(oneDrive))
+        {
+            var cand = Path.Combine(oneDrive, "Documents");
+            if (Directory.Exists(Path.Combine(cand, "Halo")))
+                return cand;
+        }
+
+        var cand2 = Path.Combine(userProfile, "OneDrive", "Documents");
+        if (Directory.Exists(Path.Combine(cand2, "Halo")))
+            return cand2;
+
+        var cand3 = Path.Combine(userProfile, "Documents");
+        if (Directory.Exists(Path.Combine(cand3, "Halo")))
+            return cand3;
+
+        return userProfile;
+    }
+
+    private static string PathCombineSafe(params string[] parts)
+    {
+        if (parts == null || parts.Length == 0) return string.Empty;
+        var valid = parts.Where(p => !string.IsNullOrEmpty(p)).ToArray();
+        if (valid.Length == 0) return string.Empty;
+        return Path.Combine(valid);
     }
 }
