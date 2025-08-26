@@ -9,6 +9,9 @@ bld/
 [Bb]in/
 [Oo]bj/
 
+# But allow publish folder
+!publish/
+
 # Visual Studio cache/options directory
 .vs/
 

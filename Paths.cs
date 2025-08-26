@@ -15,7 +15,7 @@ public static class Paths
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            BASE_PATH = "/media/pi/MiDiscoExterno";
+            BASE_PATH = "/media/pi/external_drive";
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
