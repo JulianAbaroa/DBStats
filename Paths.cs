@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace DBStats;
@@ -12,7 +16,6 @@ public static class Paths
 
     static Paths()
     {
-        // 1) Override por variable de entorno (si quieres forzar desde la Pi/Windows)
         var envOverride = Environment.GetEnvironmentVariable("DBSTATS_BASE_PATH");
         if (!string.IsNullOrWhiteSpace(envOverride))
         {
@@ -33,7 +36,9 @@ public static class Paths
 
         CarnagesDir = PathCombineSafe(BASE_PATH, "Halo", "Carnages");
         DatabaseDir = PathCombineSafe(BASE_PATH, "Halo", "DBStats DataBase");
-        SavedHashesPath = PathCombineSafe(AppContext.BaseDirectory, "Duplicates", "processed_hashes.json");
+
+        SavedHashesPath = PathCombineSafe(DatabaseDir, "processed_hashes.json");
+
         CustomizationPath = PathCombineSafe(BASE_PATH, "Halo", "Discord Bot", "customization.xml");
     }
 

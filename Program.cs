@@ -4,6 +4,7 @@ using DBStats.Duplicates;
 using DBStats.DataTypes;
 using DBStats.DataBase;
 using DBStats.Parser;
+using System.Text.Json;
 using System.Xml;
 
 namespace DBStats;
@@ -24,6 +25,26 @@ class Program
             {
                 Console.WriteLine("No XML files found. Exiting.");
                 return;
+            }
+
+            try
+            {
+                var hashesDir = Path.GetDirectoryName(Paths.SavedHashesPath);
+                if (!string.IsNullOrEmpty(hashesDir) && !Directory.Exists(hashesDir))
+                {
+                    Directory.CreateDirectory(hashesDir);
+                    Console.WriteLine($"Created directory for saved hashes: {hashesDir}");
+                }
+
+                if (!File.Exists(Paths.SavedHashesPath))
+                {
+                    File.WriteAllText(Paths.SavedHashesPath, "[]");
+                    Console.WriteLine($"Initialized saved hashes file at: {Paths.SavedHashesPath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: could not ensure saved-hashes file/dir: {ex.Message}");
             }
 
             foreach (string carnagePath in carnagePaths)
@@ -84,15 +105,25 @@ class Program
         string? matchHash = MatchHasher.ComputeMatchHash(carnagePath);
 
         if (string.IsNullOrEmpty(matchHash))
-        {
             throw new InvalidOperationException("Error: matchHash is not valid.");
-        }
 
-        List<string> processedHashes = [];
-        if (File.Exists(Paths.SavedHashesPath))
+        // Leer/crear archivo de hashes de forma segura
+        List<string> processedHashes = new List<string>();
+
+        try
         {
-            string json = File.ReadAllText(Paths.SavedHashesPath);
-            processedHashes = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+            if (File.Exists(Paths.SavedHashesPath))
+            {
+                string json = File.ReadAllText(Paths.SavedHashesPath);
+                var des = JsonSerializer.Deserialize<List<string>>(json);
+                if (des != null)
+                    processedHashes = des;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: could not read processed hashes JSON: {ex.Message}. Recreating file.");
+            processedHashes = new List<string>();
         }
 
         if (processedHashes.Contains(matchHash))
@@ -102,11 +133,27 @@ class Program
         }
 
         processedHashes.Add(matchHash);
-        string updatedJson = System.Text.Json.JsonSerializer.Serialize(processedHashes);
-        File.WriteAllText(Paths.SavedHashesPath, updatedJson);
+
+        try
+        {
+            string updatedJson = JsonSerializer.Serialize(processedHashes);
+            // Asegurarse de que el directorio existe (doble chequeo por seguridad)
+            var dir = Path.GetDirectoryName(Paths.SavedHashesPath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            File.WriteAllText(Paths.SavedHashesPath, updatedJson);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error writing saved hashes file: {ex.Message}");
+            // No queremos fallar el procesamiento por no poder escribir el archivo,
+            // así que devolvemos false (no es duplicado) y seguimos.
+        }
 
         return false;
     }
+
 
     private static void SaveProcessedCarnage(string initialPath)
     {
