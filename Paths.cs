@@ -9,6 +9,7 @@ namespace DBStats;
 public static class Paths
 {
     public static readonly string BASE_PATH;
+    public static readonly string AssetsPath;
     public static readonly string CarnagesDir;
     public static readonly string DatabaseDir;
     public static readonly string SavedHashesPath;
@@ -37,9 +38,10 @@ public static class Paths
         CarnagesDir = PathCombineSafe(BASE_PATH, "Halo", "Carnages");
         DatabaseDir = PathCombineSafe(BASE_PATH, "Halo", "DBStats DataBase");
 
-        SavedHashesPath = PathCombineSafe(DatabaseDir, "processed_hashes.json");
+        SavedHashesPath = PathCombineSafe(BASE_PATH, "processed_hashes.json");
 
-        CustomizationPath = PathCombineSafe(BASE_PATH, "Halo", "Discord Bot", "customization.xml");
+        AssetsPath = PathCombineSafe(BASE_PATH, "Halo", "MCC Assets");
+        CustomizationPath = PathCombineSafe(AssetsPath, "customization.xml");
     }
 
     private static string? DetectLinuxExternalDriveWithHalo()

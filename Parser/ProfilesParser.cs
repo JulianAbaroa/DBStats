@@ -28,7 +28,7 @@ public class ProfilesParser
                 throw new NullReferenceException("Error: PlayerName not found.");
             }
 
-            profile.Customization = CustomizationTranslator.Execute(playerNode, @"C:\Users\maste\OneDrive\Documents\Halo\Discord Bot", profile.PlayerName);
+            profile.Customization = CustomizationTranslator.Execute(playerNode, Paths.AssetsPath, profile.PlayerName);
 
             profiles.Add(profile);
         }
