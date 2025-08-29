@@ -60,7 +60,6 @@ class Program
                     continue;
                 }
 
-                // Initialization.
                 AssetsMapper.LoadMaps();
 
                 var carnageReport = new XmlDocument();
@@ -107,7 +106,6 @@ class Program
         if (string.IsNullOrEmpty(matchHash))
             throw new InvalidOperationException("Error: matchHash is not valid.");
 
-        // Leer/crear archivo de hashes de forma segura
         List<string> processedHashes = new List<string>();
 
         try

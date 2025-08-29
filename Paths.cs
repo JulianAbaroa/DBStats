@@ -38,7 +38,7 @@ public static class Paths
         CarnagesDir = PathCombineSafe(BASE_PATH, "Halo", "Carnages");
         DatabaseDir = PathCombineSafe(BASE_PATH, "Halo", "DBStats DataBase");
 
-        SavedHashesPath = PathCombineSafe(BASE_PATH, "processed_hashes.json");
+        SavedHashesPath = PathCombineSafe(BASE_PATH, "Halo", "processed_hashes.json");
 
         AssetsPath = PathCombineSafe(BASE_PATH, "Halo", "MCC Assets");
         CustomizationPath = PathCombineSafe(AssetsPath, "customization.xml");
