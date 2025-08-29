@@ -14,8 +14,20 @@ public class KingOfTheHill : IGameMode
         }
     }
 
-    public double GetScore()
+    public double GetScore(double timePlayed)
     {
-        return TimeinHill;
+        if (timePlayed <= 0) timePlayed = 1.0;
+
+        const double HILL_WEIGHT = 1.0;
+
+        double hillPerMin = TimeinHill / timePlayed;
+
+        double score = Math.Sqrt(hillPerMin) * HILL_WEIGHT;
+
+        if (!double.IsFinite(score) || score < 0.0)
+            score = 0.0;
+
+        return score;
     }
+
 }

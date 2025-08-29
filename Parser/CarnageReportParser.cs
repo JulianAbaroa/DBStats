@@ -44,8 +44,8 @@ public class CarnageReportParser
             var choice = ChoiceTranslator.Execute(playerNode, breakdown.WeaponKills);
             var medals = MedalsTranslator.Execute(playerNode, combat.Kills, survivability.MinutesAlive);
             var penalties = PenaltiesTranslator.Execute(playerNode, combat.Kills, combat.Deaths);
-            double rating = PlayerRating.GetRating(combat, breakdown, medals, survivability, penalties);
             string team = PlayerTeam.GetPlayerTeam(playerNode);
+            int score = Convert.ToInt32(playerNode.Attributes?["Score"]?.Value!);
             object? gameMode = null;
 
             switch (match.GameType)
@@ -88,6 +88,7 @@ public class CarnageReportParser
             }
 
             gameMode ??= GameType.Unknown;
+            double rating = PlayerRating.GetRating(combat, breakdown, medals, survivability, penalties, (IGameMode)gameMode);
 
             var player = new PlayerMatchStats
             {
@@ -99,6 +100,7 @@ public class CarnageReportParser
                 Choice = choice,
                 Medals = medals,
                 Penalties = penalties,
+                Score = score,
                 Rating = rating,
                 Team = team,
                 GameMode = gameMode,
@@ -118,7 +120,6 @@ public class CarnageReportParser
         {
             if (!match.IsTeamsEnabled)
             {
-                // TODO: VER COMO REACCIONA ESTO.
                 player.Team = "FFA";
             }
 
@@ -126,6 +127,7 @@ public class CarnageReportParser
             {
                 team = new Team
                 {
+                    Result = "Undefined",
                     Color = player.Team,
                     Kills = 0,
                     Deaths = 0,
@@ -166,19 +168,25 @@ public class CarnageReportParser
             throw new InvalidOperationException("Error: teams in null or empty");
         }
 
-        // TODO: PROBABLEMENTE HAYA QUE DIFERENCIAR SEGUN QUE IGAMEMODES.
-        var winningTeam = teams.OrderByDescending(t => t.GameMode?.GetScore()).FirstOrDefault()
-            ?? throw new NullReferenceException("Error: winning team is null.");
+        double maxScore = teams.Max(t => t.Players.Sum(p => p.Score));
+
+        bool isTie = teams.Count(t => t.Players.Sum(p => p.Score) == maxScore) > 1;
 
         foreach (var team in teams)
         {
-            if (team == winningTeam)
+            double teamScore = team.Players.Sum(p => p.Score);
+
+            if (isTie)
             {
-                team.Winned = true;
+                team.Result = "Undefined";
+            }
+            else if (teamScore == maxScore)
+            {
+                team.Result = "Victory";
             }
             else
             {
-                team.Winned = false;
+                team.Result = "Defeat";
             }
         }
     }

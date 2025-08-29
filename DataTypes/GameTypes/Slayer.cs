@@ -14,8 +14,20 @@ public class Slayer : IGameMode
         }
     }
 
-    public double GetScore()
+    public double GetScore(double timePlayed)
     {
-        return Rating;
+        if (timePlayed <= 0) timePlayed = 1.0;
+
+        const double SLAYER_WEIGHT = 1.0;
+
+        double ratingPerMin = Rating / timePlayed;
+
+        double score = Math.Sqrt(ratingPerMin) * SLAYER_WEIGHT;
+
+        if (!double.IsFinite(score) || score < 0.0)
+            score = 0.0;
+
+        return score;
     }
+
 }

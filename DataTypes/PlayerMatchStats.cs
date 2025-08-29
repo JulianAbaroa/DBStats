@@ -12,6 +12,7 @@ public class PlayerMatchStats
     public Choice Choice { get; set; }
     public required Medals Medals { get; set; }
     public Penalties Penalties { get; set; }
+    public int Score { get; set; }
     public double Rating { get; set; }
     public required string Team { get; set; }
     public required object GameMode { get; set; }

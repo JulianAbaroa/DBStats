@@ -14,8 +14,20 @@ public class Stockpile : IGameMode
         }
     }
 
-    public double GetScore()
+    public double GetScore(double timePlayed)
     {
-        return CarryTime;
+        if (timePlayed <= 0) timePlayed = 1.0;
+
+        const double CARRY_WEIGHT = 1.0;
+
+        double carryPerMin = CarryTime / timePlayed;
+
+        double score = Math.Sqrt(carryPerMin) * CARRY_WEIGHT;
+
+        if (!double.IsFinite(score) || score < 0.0)
+            score = 0.0;
+
+        return score;
     }
+
 }

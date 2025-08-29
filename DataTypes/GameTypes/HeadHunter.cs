@@ -14,9 +14,20 @@ public class HeadHunter : IGameMode
         }
     }
 
-    public double GetScore()
+    public double GetScore(double timePlayed)
     {
-        // TODO: TESTEAR COMO FUNCIONA ESTE MODO DE JUEGO, PROBABLEMENTE NO SE PUEDE SABER QUIEN GANO.
-        return MaxSkulls;
+        if (timePlayed <= 0) timePlayed = 1.0;
+
+        const double SKULL_WEIGHT = 1.0;
+
+        double skullsPerMin = MaxSkulls / timePlayed;
+
+        double score = Math.Sqrt(skullsPerMin) * SKULL_WEIGHT;
+
+        if (!double.IsFinite(score) || score < 0.0)
+            score = 0.0;
+
+        return score;
     }
+
 }

@@ -1,11 +1,13 @@
 using DBStats.DataTypes.Dictionaries;
 using DBStats.DataTypes.Player;
+using DBStats.Interfaces;
+using SQLitePCL;
 
 namespace DBStats.DataTranslators.Player;
 
 public class PlayerRating
 {
-    public static double GetRating(Combat combat, Breakdown breakdown, Medals medals, Survivability survivability, Penalties penalties)
+    public static double GetRating(Combat combat, Breakdown breakdown, Medals medals, Survivability survivability, Penalties penalties, IGameMode? gameMode)
     {
         const double MAX_TIME_MINUTES = 10.0;
         const double BASE = 1000.0;
@@ -22,6 +24,8 @@ public class PlayerRating
         const double WEAPON_KILL_WEIGHT = 25.0;
         const double GRENADE_KILL_WEIGHT = 35;
         const double MELEE_KILL_WEIGHT = 18;
+
+        const double OBJECTIVE_WEIGHT = 120.0;
 
         double actualMinutes = Math.Max(1.0, survivability.MinutesPlayed);
         double cappedMinutes = Math.Min(actualMinutes, MAX_TIME_MINUTES);
@@ -40,11 +44,14 @@ public class PlayerRating
             Math.Sqrt(scaledDeaths) * DEATH_PENALTY_WEIGHT;
 
         double kdaClamp = Math.Clamp(combat.KDARatio, 0.5, 3.0);
-        double killSuccessClamp = Math.Clamp(breakdown.KillSuccessRatio, 0.0, 1.5);
-
         double efficiencyMultiplier = Math.Clamp(0.5 + 0.5 * kdaClamp, MIN_EFF, MAX_EFF);
 
         double combatScore = combatRaw * efficiencyMultiplier;
+
+        double killSuccessClamp = Math.Clamp(breakdown.KillSuccessRatio, 0.0, 1.5);
+        double krsFactor = 0.8 + 0.4 * Math.Clamp(killSuccessClamp / 1.5, 0.0, 1.0);
+
+        combatScore *= krsFactor;
 
         double scaledWeapon = breakdown.WeaponKills * timeScale;
         double scaledGrenade = breakdown.GrenadeKills * timeScale;
@@ -77,7 +84,30 @@ public class PlayerRating
         double survivalScore = survivability.AliveTimeRatio * 40.0 * (cappedMinutes / MAX_TIME_MINUTES);
         double penaltyScore = penalties.Betrayals * 100.0;
 
-        double extra = combatScore + breakdownScore + medalsScore + survivalScore - penaltyScore;
+        double modeScore = 0.0;
+        if (gameMode != null)
+        {
+            try
+            {
+                double rawMode = gameMode.GetScore(survivability.MinutesPlayed);
+
+                if (!double.IsFinite(rawMode) || rawMode <= 0.0)
+                {
+                    modeScore = Math.Sqrt(rawMode * timeScale) * OBJECTIVE_WEIGHT;
+
+                    if (modeScore < 0.0)
+                    {
+                        modeScore = 0.0;
+                    }
+                }
+            }
+            catch
+            {
+                modeScore = 0.0;
+            }
+        }
+
+        double extra = combatScore + breakdownScore + medalsScore + survivalScore - penaltyScore + modeScore;
 
         double kdaNorm = (kdaClamp - 0.5) / (3.0 - 0.5);
         double ksrNorm = ksrClamp / 1.5;

@@ -14,9 +14,20 @@ public class Territories : IGameMode
         }
     }
 
-    public double GetScore()
+    public double GetScore(double timePlayed)
     {
-        // TODO: CREO QUE ESTE VALOR NO IMPLICA UNA VICTORIA NECESARIAMENTE.
-        return Captures;
+        if (timePlayed <= 0) timePlayed = 1.0;
+
+        const double CAPTURE_WEIGHT = 1.0;
+
+        double capturesPerMin = Captures / timePlayed;
+
+        double score = Math.Sqrt(capturesPerMin) * CAPTURE_WEIGHT;
+
+        if (!double.IsFinite(score) || score < 0.0)
+            score = 0.0;
+
+        return score;
     }
+
 }

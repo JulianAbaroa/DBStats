@@ -1,4 +1,3 @@
-using System.Formats.Asn1;
 using DBStats.DataTypes;
 using DBStats.DataTypes.GameTypes;
 using DBStats.DataTypes.Player;
@@ -175,24 +174,24 @@ public class DataBaseInserter
         using var cmd = connection.CreateCommand();
         cmd.CommandText = @"INSERT INTO Teams (
             match_id,
+            result,
             color,
             rating,
-            winned,
             deaths,
             kills
         ) VALUES (
             $match_id,
+            $result,
             $color,
             $rating,
-            $winned,
             $deaths,
             $kills
         );";
 
         cmd.Parameters.AddWithValue("$match_id", matchID);
+        cmd.Parameters.AddWithValue("$result", team.Result);
         cmd.Parameters.AddWithValue("$color", team.Color);
         cmd.Parameters.AddWithValue("$rating", team.Rating);
-        cmd.Parameters.AddWithValue("$winned", team.Winned);
         cmd.Parameters.AddWithValue("$deaths", team.Deaths);
         cmd.Parameters.AddWithValue("$kills", team.Kills);
 
@@ -546,12 +545,13 @@ public class DataBaseInserter
 
         using var insertCMD = connection.CreateCommand();
         insertCMD.CommandText = @"
-            INSERT INTO Players (player_id, team_id, rating)
-            VALUES ($player_id, $team_id, $rating)
+            INSERT INTO Players (player_id, team_id, score, rating)
+            VALUES ($player_id, $team_id, $score, $rating)
         ";
 
         insertCMD.Parameters.AddWithValue("$player_id", player.PlayerID);
         insertCMD.Parameters.AddWithValue("$team_id", teamID);
+        insertCMD.Parameters.AddWithValue("$score", player.Score);
         insertCMD.Parameters.AddWithValue("$rating", player.Rating);
 
         int rows = insertCMD.ExecuteNonQuery();

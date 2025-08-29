@@ -32,9 +32,9 @@ public class DataBaseInitializer
             var createTeamsTable = @"CREATE TABLE IF NOT EXISTS Teams (
                 team_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 match_id TEXT NOT NULL,
+                result TEXT NOT NULL,
                 color TEXT NOT NULL,
                 rating REAL NOT NULL,
-                winned INTEGER NOT NULL,
                 deaths INTEGER NOT NULL,
                 kills INTEGER NOT NULL,
                 FOREIGN KEY(match_id) REFERENCES Matches(match_id) ON DELETE CASCADE
@@ -240,6 +240,7 @@ public class DataBaseInitializer
                 player_match_id INTEGER PRIMARY KEY AUTOINCREMENT,  
                 player_id TEXT NOT NULL,
                 team_id INTEGER NOT NULL,
+                score INTEGER NOT NULL,
                 rating REAL NOT NULL,
                 FOREIGN KEY(player_id) REFERENCES Profiles(player_id) ON DELETE CASCADE,
                 FOREIGN KEY(team_id) REFERENCES Teams(team_id) ON DELETE CASCADE
