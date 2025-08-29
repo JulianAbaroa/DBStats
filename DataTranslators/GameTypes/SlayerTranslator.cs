@@ -10,7 +10,10 @@ public class SlayerTranslator
         var customStats = player.SelectSingleNode("CustomStats")
             ?? throw new NullReferenceException("CustomStats is null.");
 
-        double rating = Convert.ToDouble(customStats.Attributes?["RATING"]?.Value);
+        var ratingNode = customStats.SelectSingleNode("CustomStat[@mStatName='RATING']")
+            ?? throw new NullReferenceException("ratingNode is null.");
+
+        double rating = Convert.ToDouble(ratingNode.Attributes?["mValueForDisplay"]?.Value);
 
         return new Slayer
         {

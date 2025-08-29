@@ -10,7 +10,10 @@ public class StockpileTranslator
         var customStats = playerNode.SelectSingleNode("CustomStats")
                     ?? throw new NullReferenceException("CustomStats is null.");
 
-        double carryTime = Convert.ToDouble(customStats.Attributes?["CARRY TIME"]?.Value);
+        var carryTimeNode = customStats.SelectSingleNode("CustomStat[@mStatName='CARRY TIME']")
+            ?? throw new NullReferenceException("carryTimeNode is null.");
+
+        double carryTime = Convert.ToDouble(carryTimeNode.Attributes?["mValueForDisplay"]?.Value);
 
         return new Stockpile
         {

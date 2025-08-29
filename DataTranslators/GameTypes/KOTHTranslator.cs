@@ -10,7 +10,10 @@ public class KOTHTranslator
         var customStats = playerNode.SelectSingleNode("CustomStats")
             ?? throw new NullReferenceException("CustomStats is null.");
 
-        double timeinHill = Convert.ToDouble(customStats.Attributes?["Time in Hill"]?.Value);
+        var timeinHillNode = customStats.SelectSingleNode("CustomStat[@mStatName='Time in Hill']")
+            ?? throw new NullReferenceException("timeinHillNode is null.");
+
+        double timeinHill = Convert.ToDouble(timeinHillNode.Attributes?["mValueForDisplay"]?.Value);
 
         return new KingOfTheHill
         {

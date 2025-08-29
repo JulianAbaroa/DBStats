@@ -14,7 +14,7 @@ public enum WeaponType
     PlasmaPistol = 24,
     Needler = 25,
     GravityHammer = 26,
-    EnerySword = 27,
+    EnergySword = 27,
     ConcussionRifle = 32,
     Ghost = 34,
     Revenant = 35,

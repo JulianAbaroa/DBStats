@@ -10,8 +10,15 @@ public class OddballTranslator
         var customStats = playerNode.SelectSingleNode("CustomStats")
             ?? throw new NullReferenceException("CustomStats is null.");
 
-        double carryTime = Convert.ToDouble(customStats.Attributes?["CARRY TIME"]?.Value);
-        int ballKills = Convert.ToInt32(customStats.Attributes?["CARRY TIME"]?.Value);
+        var carryTimeNode = customStats.SelectSingleNode("CustomStat[@mStatName='CARRY TIME']")
+            ?? throw new NullReferenceException("carryTimeNode is null.");
+
+        double carryTime = Convert.ToDouble(carryTimeNode.Attributes?["mValueForDisplay"]?.Value);
+
+        var ballKillsNode = customStats.SelectSingleNode("CustomStat[@mStatName='BALL KILLS']")
+            ?? throw new NullReferenceException("ballKillsNode is null.");
+
+        int ballKills = Convert.ToInt32(ballKillsNode.Attributes?["mValueForDisplay"]?.Value);
 
         return new Oddball
         {

@@ -8,9 +8,12 @@ public class TerritoriesTranslator
     public static Territories Execute(XmlNode playerNode)
     {
         var customStats = playerNode.SelectSingleNode("CustomStats")
-                    ?? throw new NullReferenceException("CustomStats is null.");
+            ?? throw new NullReferenceException("CustomStats is null.");
 
-        int captures = Convert.ToInt32(customStats.Attributes?["Captures"]?.Value);
+        var capturesNode = customStats.SelectSingleNode("CustomStat[@mStatName='Captures']")
+            ?? throw new NullReferenceException("capturesNode is null.");
+
+        int captures = Convert.ToInt32(capturesNode.Attributes?["mValueForDisplay"]?.Value);
 
         return new Territories
         {

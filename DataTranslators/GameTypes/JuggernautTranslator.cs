@@ -10,7 +10,10 @@ public class JuggernautTranslator
         var customStats = playerNode.SelectSingleNode("CustomStats")
                     ?? throw new NullReferenceException("CustomStats is null.");
 
-        double juggernautTime = Convert.ToDouble(customStats.Attributes?["Juggernaut Time"]?.Value);
+        var juggernautTimeNode = customStats.SelectSingleNode("CustomStat[@mStatName='Juggernaut Time']")
+            ?? throw new NullReferenceException("juggernautTimeNode is null.");
+
+        double juggernautTime = Convert.ToDouble(juggernautTimeNode.Attributes?["mValueForDisplay"]?.Value);
 
         return new Juggernaut
         {
