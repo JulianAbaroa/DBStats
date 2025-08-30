@@ -13,7 +13,10 @@ public class JuggernautTranslator
         var juggernautTimeNode = customStats.SelectSingleNode("CustomStat[@mStatName='Juggernaut Time']")
             ?? throw new NullReferenceException("juggernautTimeNode is null.");
 
-        double juggernautTime = Convert.ToDouble(juggernautTimeNode.Attributes?["mValueForDisplay"]?.Value);
+        string? juggernautTimeString = juggernautTimeNode.Attributes?["mValueForDisplay"]?.Value
+            ?? throw new NullReferenceException("juggernautTime is null.");
+
+        double juggernautTime = Utils.GetMinutesFromString(juggernautTimeString);
 
         return new Juggernaut
         {

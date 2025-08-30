@@ -39,19 +39,9 @@ public class CTFTranslator
     {
         var flagCarryTimeNode = customStats.SelectSingleNode("CustomStat[@mStatName='Flag Carry Time']");
         string flagCarryTimeString = flagCarryTimeNode?.Attributes!["mValueForDisplay"]?.Value!;
-        return GetMinutesFromString(flagCarryTimeString);
+        return Utils.GetMinutesFromString(flagCarryTimeString);
     }
 
-    /// <summary>
-    /// Only can transform string minutes in the format: 'MM:SS'.
-    /// </summary>
-    /// <param name="minutes"></param>
-    /// <returns></returns>
-    private static double GetMinutesFromString(string minutes)
-    {
-        var parts = minutes.Split(':');
-        var timeSpan = TimeSpan.FromMinutes(int.Parse(parts[0])) + TimeSpan.FromSeconds(int.Parse(parts[1]));
-        return timeSpan.TotalSeconds / 60.0d;
-    }
+
 
 }

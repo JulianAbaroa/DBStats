@@ -13,7 +13,10 @@ public class InfectionTranslator
         var survivalTimeNode = customStats.SelectSingleNode("CustomStat[@mStatName='Survival Time']")
             ?? throw new NullReferenceException("survivalTimeNode is null.");
 
-        double survivalTime = Convert.ToDouble(survivalTimeNode.Attributes?["mValueForDisplay"]?.Value);
+        string? survivalTimeString = survivalTimeNode.Attributes?["mValueForDisplay"]?.Value
+            ?? throw new NullReferenceException("survivalTimeString is null.");
+
+        double survivalTime = Utils.GetMinutesFromString(survivalTimeString);
 
         var infectionsNode = customStats.SelectSingleNode("CustomStat[@mStatName='Infections']")
             ?? throw new NullReferenceException("infectionsNode is null.");

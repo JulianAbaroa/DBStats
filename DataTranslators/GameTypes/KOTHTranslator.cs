@@ -13,11 +13,14 @@ public class KOTHTranslator
         var timeinHillNode = customStats.SelectSingleNode("CustomStat[@mStatName='Time in Hill']")
             ?? throw new NullReferenceException("timeinHillNode is null.");
 
-        double timeinHill = Convert.ToDouble(timeinHillNode.Attributes?["mValueForDisplay"]?.Value);
+        string? timeinHillString = timeinHillNode.Attributes?["mValueForDisplay"]?.Value
+            ?? throw new NullReferenceException("timeInHill is null.");
+
+        double timeInHill = Utils.GetMinutesFromString(timeinHillString);
 
         return new KingOfTheHill
         {
-            TimeinHill = timeinHill,
+            TimeinHill = timeInHill,
         };
     }
 }

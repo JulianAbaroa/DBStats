@@ -13,7 +13,10 @@ public class OddballTranslator
         var carryTimeNode = customStats.SelectSingleNode("CustomStat[@mStatName='CARRY TIME']")
             ?? throw new NullReferenceException("carryTimeNode is null.");
 
-        double carryTime = Convert.ToDouble(carryTimeNode.Attributes?["mValueForDisplay"]?.Value);
+        string? carryTimeString = carryTimeNode.Attributes?["mValueForDisplay"]?.Value
+            ?? throw new NullReferenceException("carryTime is null.");
+
+        double carryTime = Utils.GetMinutesFromString(carryTimeString);
 
         var ballKillsNode = customStats.SelectSingleNode("CustomStat[@mStatName='BALL KILLS']")
             ?? throw new NullReferenceException("ballKillsNode is null.");

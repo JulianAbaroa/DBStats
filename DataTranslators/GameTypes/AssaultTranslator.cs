@@ -23,7 +23,10 @@ public class AssaultTranslator
         var bombCarryTimeNode = customStats.SelectSingleNode("CustomStat[@mStatName='Bomb Carry Time']")
             ?? throw new NullReferenceException("bombCarryTimeNode is null.");
 
-        double bombCarryTime = Convert.ToDouble(bombCarryTimeNode.Attributes?["mValueForDisplay"]?.Value);
+        string? bombCarryTimeString = bombCarryTimeNode.Attributes?["mValueForDisplay"]?.Value
+            ?? throw new NullReferenceException("bombCarryTimeString is null.");
+
+        double bombCarryTime = Utils.GetMinutesFromString(bombCarryTimeString);
 
         var defusesNode = customStats.SelectSingleNode("CustomStat[@mStatName='Defuses']")
             ?? throw new NullReferenceException("defusesNode is null.");
