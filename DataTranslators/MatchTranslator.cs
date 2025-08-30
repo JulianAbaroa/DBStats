@@ -53,7 +53,7 @@ public class MatchTranslator
                        ?.Cast<XmlNode>()
                        .Select(stat => stat.Attributes?["mStatName"]?.Value ?? "")
                        .Where(name => !string.IsNullOrWhiteSpace(name))
-                       ?? Enumerable.Empty<string>(),
+                       ?? [],
             StringComparer.OrdinalIgnoreCase
         );
 
@@ -71,11 +71,6 @@ public class MatchTranslator
         int emptyStats = customStats.SelectNodes("CustomStat")
                                     ?.Cast<XmlNode>()
                                     .Count(stat => string.IsNullOrWhiteSpace(stat.Attributes?["mStatName"]?.Value)) ?? 0;
-
-        if (emptyStats >= 4)
-        {
-            return GameType.Stockpile;
-        }
 
         return GameType.Unknown;
     }
