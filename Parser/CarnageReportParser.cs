@@ -41,7 +41,7 @@ public class CarnageReportParser
             var combat = CombatTranslator.Execute(playerNode, survivability.MinutesAlive);
             var breakdown = BreakdownTranslator.Execute(playerNode, combat.Kills, combat.Deaths, combat.Assists, survivability.MinutesAlive);
             var rivalries = RivalriesTranslator.Execute(playerNode, combat.Kills, combat.Deaths);
-            var choice = ChoiceTranslator.Execute(playerNode, breakdown.WeaponKills);
+            var choice = ChoiceTranslator.Execute(playerNode, combat.Kills);
             var medals = MedalsTranslator.Execute(playerNode, combat.Kills, survivability.MinutesAlive);
             var penalties = PenaltiesTranslator.Execute(playerNode, combat.Kills, combat.Deaths);
             string team = PlayerTeam.GetPlayerTeam(playerNode);
