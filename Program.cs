@@ -69,7 +69,7 @@ class Program
                     ?? throw new NullReferenceException("Error: The 'Players' node was not found in the XML.");
 
                 Match match = CarnageReportParser.ParseMatch(carnageReport, playerNodes, carnagePath);
-                List<Profile> profiles = ProfilesParser.ParseProfiles(playerNodes);
+                List<Profile> profiles = ProfilesParser.ParseProfiles(playerNodes, Path.GetFileNameWithoutExtension(carnagePath));
 
                 if (!File.Exists(Paths.DatabaseDir))
                 {
