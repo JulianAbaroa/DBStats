@@ -84,10 +84,15 @@ public class CarnageReportParser
                     gameMode = new ActionSack();
                     break;
                 case GameType.Unknown:
+                    gameMode = new UnknownGameMode();
                     break;
             }
 
-            gameMode ??= GameType.Unknown;
+            if (gameMode == null)
+            {
+                throw new NullReferenceException("gameMode is null.");
+            }
+
             double rating = PlayerRating.GetRating(combat, breakdown, medals, survivability, penalties, (IGameMode)gameMode);
 
             var player = new PlayerMatchStats

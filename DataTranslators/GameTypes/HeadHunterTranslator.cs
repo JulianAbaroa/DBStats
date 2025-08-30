@@ -20,4 +20,5 @@ public class HeadHunterTranslator
             MaxSkulls = maxSkulls,
         };
     }
+
 }
